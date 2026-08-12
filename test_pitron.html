@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מעבדת בקרה — test_pitron</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#1e293b;--muted:#64748b;
+  --accent:#f59e0b;--blue:#3b82f6;--green:#10b981;--red:#ef4444;--purple:#8b5cf6;
+  --tag-bg:#f1f5f9;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);direction:rtl;padding:16px;max-width:1600px;margin:0 auto;}
+h1{font-size:20px;margin-bottom:2px;}
+.subtitle{font-size:13px;color:var(--muted);margin-bottom:12px;}
+
+/* Top bar */
+.top-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap;}
+.top-bar .count{font-size:13px;color:var(--muted);background:var(--tag-bg);padding:4px 14px;border-radius:20px;}
+.top-bar .actions{display:flex;gap:8px;flex-wrap:wrap;}
+.btn{padding:7px 16px;border:1px solid var(--border);border-radius:8px;background:var(--card);cursor:pointer;font-family:inherit;font-size:12px;color:var(--text);transition:background .15s;display:inline-flex;align-items:center;gap:6px;}
+.btn:hover{background:var(--tag-bg);}
+.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue);}
+.btn-primary:hover{background:#2563eb;}
+.btn-warn{background:#fef3c7;color:#92400e;border-color:#fde68a;}
+.btn-warn:hover{background:#fde68a;}
+
+/* Data source banner */
+.src-banner{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 16px;font-size:12px;color:#92400e;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.src-banner.hidden{display:none;}
+.src-banner .close-btn{margin-right:auto;cursor:pointer;opacity:.6;}
+.src-banner .close-btn:hover{opacity:1;}
+
+/* Solution card wrapper */
+.sol-card{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.sol-header{display:flex;align-items:center;gap:10px;padding:14px 18px;cursor:pointer;user-select:none;transition:background .15s;border-bottom:1px solid transparent;}
+.sol-header:hover{background:var(--tag-bg);}
+.sol-header.open{border-bottom-color:var(--border);}
+.sol-header .num{width:32px;height:32px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
+.sol-header .name{font-size:15px;font-weight:700;flex:1;}
+.sol-header .meta{font-size:12px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap;}
+.sol-header .meta span{white-space:nowrap;}
+.sol-header .arrow{font-size:12px;color:var(--muted);transition:transform .2s;flex-shrink:0;}
+.sol-header.open .arrow{transform:rotate(180deg);}
+
+/* Collapsible body */
+.sol-body{display:none;padding:0 18px 18px;}
+.sol-body.open{display:block;}
+
+/* Sections */
+.section{border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:12px;}
+.section-title{font-size:14px;font-weight:700;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;}
+.section-title .icon{font-size:16px;}
+
+/* Field grid */
+.field-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;}
+.field{display:flex;flex-direction:column;gap:1px;}
+.field-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;}
+.field-value{font-size:13px;font-weight:600;min-height:20px;padding:3px 7px;border-radius:5px;background:var(--tag-bg);word-break:break-word;}
+.field-value.empty{color:var(--red);font-weight:400;font-style:italic;}
+
+/* Table */
+.mentor-table{width:100%;border-collapse:collapse;font-size:12px;}
+.mentor-table th{text-align:right;padding:6px 8px;background:var(--tag-bg);font-weight:600;font-size:10px;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--border);white-space:nowrap;}
+.mentor-table td{padding:6px 8px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.mentor-table tr:last-child td{border-bottom:none;}
+.type-badge{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;}
+.badge-regular{background:#f1f5f9;color:#475569;}
+.badge-internal{background:#fef3c7;color:#92400e;}
+.badge-accomp{background:#dbeafe;color:#1e40af;}
+.mentor-table .num{text-align:center;font-variant-numeric:tabular-nums;}
+.mentor-table .total-cell{font-weight:700;text-align:center;}
+.row-internal{background:#fffbeb;}
+.row-accomp{background:#eff6ff;}
+
+/* Summary row */
+.summary-row{display:flex;gap:8px;flex-wrap:wrap;padding-top:8px;margin-top:8px;border-top:2px solid var(--border);}
+.summary-item{flex:1;min-width:100px;text-align:center;padding:6px;border-radius:6px;background:var(--tag-bg);}
+.summary-item .val{font-size:18px;font-weight:700;}
+.summary-item .lbl{font-size:10px;color:var(--muted);margin-top:1px;}
+
+/* Warning */
+.warn{margin-top:8px;padding:6px 10px;border-radius:6px;font-size:12px;}
+.warn-err{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;}
+.warn-warn{background:#fef9c3;border:1px solid #fde047;color:#854d0e;}
+
+/* Variable mapping table */
+.var-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:8px;direction:ltr;}
+.var-table th{text-align:left;padding:4px 8px;background:#1e293b;color:#e2e8f0;font-size:10px;font-weight:600;border:none;}
+.var-table td{padding:4px 8px;border-bottom:1px solid #334155;color:#cbd5e1;}
+.var-table tr:last-child td{border-bottom:none;}
+.var-table .var-name{color:#7dd3fc;font-family:monospace;white-space:nowrap;}
+.var-table .var-val{color:#fbbf24;font-weight:600;direction:rtl;text-align:right;}
+.var-table .sep-row td{background:#334155;color:#94a3b8;font-weight:700;padding:6px 8px;border:none;}
+
+/* Raw JSON button */
+.btn-raw{padding:4px 12px;border:1px solid var(--border);border-radius:6px;background:var(--card);cursor:pointer;font-family:inherit;font-size:11px;color:var(--muted);margin-left:6px;margin-top:6px;}
+.btn-raw:hover{background:var(--tag-bg);}
+.raw-block{background:#1e293b;color:#e2e8f0;padding:12px;border-radius:6px;font-size:11px;max-height:300px;overflow:auto;direction:ltr;text-align:left;white-space:pre-wrap;word-break:break-all;margin-top:8px;display:none;}
+
+/* Empty state */
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted);}
+.empty-state strong{font-size:28px;display:block;margin-bottom:4px;color:var(--text);}
+.empty-state p{margin-top:8px;}
+
+/* Import overlay */
+.import-zone{border:2px dashed var(--border);border-radius:12px;padding:40px 20px;text-align:center;transition:border-color .2s,background .2s;cursor:pointer;}
+.import-zone:hover,.import-zone.dragover{border-color:var(--blue);background:#eff6ff;}
+.import-zone p{color:var(--muted);font-size:13px;}
+.import-zone .big{font-size:24px;margin-bottom:8px;}
+
+/* Hidden file input */
+#fileImport{display:none;}
+
+/* Responsive */
+@media(max-width:600px){
+  body{padding:10px;}
+  .field-grid{grid-template-columns:1fr;}
+  .mentor-table{font-size:11px;}
+  .mentor-table th,.mentor-table td{padding:4px 5px;}
+  .summary-row{flex-direction:column;}
+  .sol-header .meta{display:none;}
+  .top-bar{flex-direction:column;align-items:stretch;}
+}
+</style>
+</head>
+<body>
+
+<h1>🔬 מעבדת בקרה — test_pitron</h1>
+<p class="subtitle">תצוגת נתונים מלאה של כל פתרונות הלמידה — כולל מיפוי למשתנים פנימיים וחריגות</p>
+
+<div id="srcBanner" class="src-banner hidden">
+  <span>📦</span>
+  <span id="srcText">מציג נתוני דוגמה</span>
+  <span class="close-btn" onclick="document.getElementById('srcBanner').classList.add('hidden')">✕</span>
+</div>
+
+<div class="top-bar">
+  <span class="count" id="countLabel">0 פתרונות</span>
+  <div class="actions">
+    <button class="btn btn-primary" onclick="loadDemoData()">🧪 טען נתוני דוגמה</button>
+    <button class="btn" onclick="triggerImport()">📂 ייבוא JSON</button>
+    <button class="btn" onclick="tryLoadFromSystem()">🔄 טען מהמערכת</button>
+    <button class="btn" onclick="toggleAll(true)">🔼 הסתר הכל</button>
+    <button class="btn" onclick="toggleAll(false)">🔽 הצג הכל</button>
+  </div>
+</div>
+
+<input type="file" id="fileImport" accept=".json" onchange="handleFileImport(event)">
+
+<div id="output"></div>
+
+<script>
+// ==================== STATE ====================
+var P = 'matspanet_';
+var _store = {}; // active data store (key -> array)
+var _periods = null;
+var _p1Label = 'תקופה א׳';
+var _p2Label = 'תקופה ב׳';
+var _dataSource = '';
+
+// ==================== STORAGE HELPERS ====================
+function lsNative(key){try{return JSON.parse(localStorage.getItem(P+key)||'[]');}catch(e){return[];}}
+function ls(key){
+  if(_store[key]!==undefined) return _store[key];
+  return lsNative(key);
+}
+
+function lookupLabel(lk,vid){
+  if(!vid)return'';
+  var items=ls(lk);
+  for(var i=0;i<items.length;i++){if(items[i].id===vid||items[i].value===vid)return items[i].label||items[i].value||vid;}
+  return vid;
+}
+function guideName(gid){
+  if(!gid)return'';
+  var items=ls('guides_repo');
+  for(var i=0;i<items.length;i++){if(items[i].id===gid)return items[i].fullName||items[i].name||gid;}
+  return gid;
+}
+function esc(s){if(s===null||s===undefined)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function valH(v){
+  var empty=(v===null||v===undefined||v==='');
+  return '<div class="field-value'+(empty?' empty':'')+'">'+(empty?'ריק':esc(v))+'</div>';
+}
+function getMentorType(m){
+  if(!m)return'רגיל';
+  if((m.fullName||'')==='כוח פנים')return'כוח פנים';
+  if(m.performerType==='כוח פנים')return'כוח פנים';
+  if(!!m.isAccompaniment)return'שעות ליווי';
+  return'רגיל';
+}
+function badgeH(t){
+  if(t==='כוח פנים')return'<span class="type-badge badge-internal">🏠 כוח פנים</span>';
+  if(t==='שעות ליווי')return'<span class="type-badge badge-accomp">🕐 שעות ליווי</span>';
+  return'<span class="type-badge badge-regular">רגיל</span>';
+}
+function arrL(lk,v){
+  if(!v)return'';
+  return v.split(',').map(function(s){return s.trim();}).filter(Boolean).map(function(id){return lookupLabel(lk,id);}).join(', ');
+}
+function smI(label,value,sub){return'<div class="summary-item"><div class="val">'+value+'</div><div class="lbl">'+esc(label)+(sub?' — '+esc(sub):'')+'</div></div>';}
+function fld(l,v){return'<div class="field"><div class="field-label">'+esc(l)+'</div>'+valH(v)+'</div>';}
+
+function loadPeriods(){
+  _periods=ls('periods');
+  if(_periods.length>=1){
+    _p1Label=_periods[0].period1Label||_periods[0].label||_p1Label;
+    _p2Label=_periods[0].period2Label||_periods[0].label||_p2Label;
+    if(_periods.length>=2&&_periods[1].period1Label){_p1Label=_periods[0].period1Label;_p2Label=_periods[1].period1Label||_p2Label;}
+  }
+}
+
+// ==================== VARIABLE MAPPING TABLE ====================
+function varRow(label, jsExpr, rawVal) {
+  return '<tr>'+
+    '<td class="var-name">' + esc(jsExpr) + '</td>'+
+    '<td class="var-val">' + esc(label) + '</td>'+
+    '<td style="color:#e2e8f0;direction:rtl;text-align:right;">' + esc(rawVal === undefined ? '—' : rawVal) + '</td>'+
+    '</tr>';
+}
+
+function buildVarTable(s, insts) {
+  var h = '<table class="var-table"><thead><tr><th>משתנה JS / שדה DataStore</th><th>תווית תצוגה</th><th>ערך נוכחי</th></tr></thead><tbody>';
+  var rows = [
+    ['s.name', 'שם פתרון', s.name],
+    ['s.solutionNumber', 'מספר פתרון', s.solutionNumber],
+    ['s.schoolName', 'שם בית ספר', s.schoolName],
+    ['s.academicHours', 'שעות אקדמיות', s.academicHours],
+    ['s.budgetType', 'סטטוס תקצוב', s.budgetType],
+    ['s.budgetTypeValue', 'סוג תקצוב (ID)', s.budgetTypeValue],
+    ['→ lookupLabel', 'סוג תקצוב (תווית)', lookupLabel('lookup_budget_types', s.budgetTypeValue)],
+    ['s.budgetedHours', 'שעות מתוקצבות', s.budgetedHours],
+    ['s.internalForceHours', 'שעות כוח פנים', s.internalForceHours],
+    ['s.accBudgetedHours', 'שעות ליווי', s.accBudgetedHours],
+    ['s.period1Hours', 'תקופה א׳ (01-08)', s.period1Hours],
+    ['s.period2Hours', 'תקופה ב׳ (09-12)', s.period2Hours],
+    ['s.topicType', 'תחום (ID)', s.topicType],
+    ['s.topic', 'נושא', s.topic],
+    ['s.guideId', 'מדריך (ID)', s.guideId],
+    ['→ guideName', 'מדריך (שם)', guideName(s.guideId)],
+    ['s.meetingType', 'סוג מפגש (ID)', s.meetingType],
+    ['s.weekDay', 'יום בשבוע (ID)', s.weekDay],
+  ];
+  for (var i = 0; i < rows.length; i++) {
+    h += varRow(rows[i][1], rows[i][0], rows[i][2]);
+  }
+  for (var j = 0; j < insts.length; j++) {
+    var m = insts[j];
+    var mt = getMentorType(m);
+    var prefix = 'insts[' + j + '].';
+    h += '<tr class="sep-row"><td colspan="3">--- מנחה ' + (j+1) + ': ' + esc(m.fullName||'') + ' ---</td></tr>';
+    h += varRow('שם', prefix + 'fullName', m.fullName);
+    h += varRow('ת.ז.', prefix + 'idNumber', m.idNumber);
+    h += varRow('performerType (גולמי)', prefix + 'performerType', m.performerType || '—');
+    h += varRow('isAccompaniment (גולמי)', prefix + 'isAccompaniment', m.isAccompaniment);
+    h += varRow('סוג מנחה (מחושב)', '→ _getMentorType(m)', mt);
+    h += varRow('תקופה א׳', prefix + 'period1Hours', m.period1Hours);
+    h += varRow('תקופה ב׳', prefix + 'period2Hours', m.period2Hours);
+    h += varRow('סה״כ (קבוע/מחושב)', prefix + 'totalAcademicHours', m.totalAcademicHours);
+    h += varRow('שעות הדרכה', prefix + 'guideHours', m.guideHours);
+    var isSp = (mt==='כוח פנים'||mt==='שעות ליווי');
+    var calcTotal = isSp ? (m.totalAcademicHours||0) : ((m.period1Hours||0)+(m.period2Hours||0));
+    h += varRow('סה״כ לייצוא', '→ calcTotal', calcTotal);
+  }
+  h += '</tbody></table>';
+  return h;
+}
+
+// ==================== BUILD SOLUTION CARD ====================
+function buildCard(s, idx) {
+  var allInsts = ls('solution_instructors');
+  var insts = allInsts.filter(function(inst){return inst.solutionId===s.id && !inst._deleted;});
+  var cardId = 'card_' + idx;
+  var bodyId = 'body_' + idx;
+  var rawId = 'raw_' + idx;
+
+  var headerHtml = '<div class="sol-header open" onclick="toggleCard(\''+cardId+'\',\''+bodyId+'\')" >'+
+    '<div class="num">'+(idx+1)+'</div>'+
+    '<div class="name">'+esc(s.name||'ללא שם')+'</div>'+
+    '<div class="meta">'+
+      '<span>📋 '+(s.solutionNumber||'—')+'</span>'+
+      '<span>🏫 '+(s.schoolName||'—')+'</span>'+
+      '<span>⏱ '+(s.academicHours||0)+' שע׳</span>'+
+      '<span>👨‍🏫 '+insts.length+' מנחים</span>'+
+      (s.budgetType==='מתוקצב'||s.budgetType==='כן'?'<span style="color:var(--green);">✅ מתוקצב</span>':'<span>⏳ לא הוגדר</span>')+
+    '</div>'+
+    '<div class="arrow">▼</div>'+
+  '</div>';
+
+  var bodyHtml = '<div class="sol-body open" id="'+bodyId+'">';
+
+  // --- Section: Basic Info ---
+  bodyHtml += '<div class="section"><div class="section-title"><span class="icon">📋</span> נתוני יסוד</div><div class="field-grid">';
+  bodyHtml += fld('שם',s.name);
+  bodyHtml += fld('מספר פתרון',s.solutionNumber);
+  bodyHtml += fld('תיאור',s.description);
+  bodyHtml += fld('סוג אחריות',lookupLabel('lookup_responsibility_types',s.responsibilityType));
+  bodyHtml += fld('בית ספר',s.schoolName);
+  bodyHtml += fld('תחום',lookupLabel('lookup_domains',s.topicType));
+  bodyHtml += fld('נושא',s.topic);
+  bodyHtml += fld('מדריך',guideName(s.guideId));
+  bodyHtml += fld('שלב חינוך',arrL('lookup_education_stages',s.educationStage));
+  bodyHtml += fld('סוג חינוך',arrL('lookup_education_types',s.educationType));
+  bodyHtml += fld('סוג מפגש',lookupLabel('lookup_meeting_types',s.meetingType));
+  bodyHtml += fld('יום',lookupLabel('lookup_week_days',s.weekDay));
+  bodyHtml += fld('תאריך התחלה',s.startDate);
+  bodyHtml += fld('תאריך סיום',s.endDate);
+  bodyHtml += fld('שעות אקדמיות',s.academicHours);
+  bodyHtml += fld('קטלוג',s.showInCatalog?'כן':(s.showInPublicCatalog?'ציבורי':'לא'));
+  bodyHtml += fld('הערות',s.notes);
+  bodyHtml += fld('ID',s.id);
+  bodyHtml += '</div></div>';
+
+  // --- Section: Budget ---
+  bodyHtml += '<div class="section"><div class="section-title"><span class="icon">💰</span> תקצוב</div><div class="field-grid">';
+  var bs = (s.budgetType==='מתוקצב'||s.budgetType==='כן')?'✅ מתוקצב':(s.budgetType==='לא מתוקצב'?'🚫 לא מתוקצב':'⏳ '+(s.budgetType||'לא נבחר'));
+  bodyHtml += fld('סטטוס',bs);
+  bodyHtml += fld('סוג תקצוב',lookupLabel('lookup_budget_types',s.budgetTypeValue));
+  bodyHtml += fld('שעות מתוקצבות',s.budgetedHours);
+  bodyHtml += fld('שעות כוח פנים',s.internalForceHours);
+  bodyHtml += fld('שעות ליווי',s.accBudgetedHours);
+  bodyHtml += '</div></div>';
+
+  // --- Section: Periods ---
+  bodyHtml += '<div class="section"><div class="section-title"><span class="icon">📅</span> חלוקת שעות לתקופות (רמת פתרון)</div><div class="field-grid">';
+  bodyHtml += fld(_p2Label+' (09-12)',s.period2Hours);
+  bodyHtml += fld(_p1Label+' (01-08)',s.period1Hours);
+  var sP1=parseFloat(s.period1Hours)||0,sP2=parseFloat(s.period2Hours)||0;
+  bodyHtml += fld('סה״כ תקופות',(sP1+sP2)>0?(sP1+sP2):'');
+  bodyHtml += '</div>';
+  if(sP1+sP2>0&&s.academicHours>0&&Math.abs(sP1+sP2-s.academicHours)>0.01){
+    bodyHtml+='<div class="warn warn-err">⚠️ סכום תקופות ('+(sP1+sP2)+') ≠ שעות אקדמיות ('+s.academicHours+')</div>';
+  }
+  bodyHtml += '</div>';
+
+  // --- Section: Instructors ---
+  bodyHtml += '<div class="section"><div class="section-title"><span class="icon">👨‍🏫</span> מנחים ('+insts.length+')</div>';
+  if(insts.length===0){
+    bodyHtml+='<p style="color:var(--muted);font-size:13px;">אין מנחים</p>';
+  } else {
+    bodyHtml+='<div style="overflow-x:auto;"><table class="mentor-table"><thead><tr>';
+    bodyHtml+='<th>#</th><th>סוג</th><th>שם</th><th>ת.ז.</th>';
+    bodyHtml+='<th>'+esc(_p2Label)+'</th><th>'+esc(_p1Label)+'</th><th>סה״כ</th><th>הדרכה</th>';
+    bodyHtml+='<th>performerType</th><th>isAccomp.</th>';
+    bodyHtml+='</tr></thead><tbody>';
+    var rS=0,iS=0,aS=0,rP1=0,rP2=0,iP1=0,iP2=0,aP1=0,aP2=0;
+    for(var j=0;j<insts.length;j++){
+      var m=insts[j],mt=getMentorType(m),isSp=(mt==='כוח פנים'||mt==='שעות ליווי');
+      var mP1=m.period1Hours||0,mP2=m.period2Hours||0,mT=isSp?(m.totalAcademicHours||0):(mP1+mP2),mG=m.guideHours||0;
+      var rc=mt==='כוח פנים'?'row-internal':(mt==='שעות ליווי'?'row-accomp':'');
+      bodyHtml+='<tr class="'+rc+'"><td>'+(j+1)+'</td><td>'+badgeH(mt)+'</td>';
+      bodyHtml+='<td>'+(isSp?'<strong>'+esc(m.fullName)+'</strong>':esc(m.fullName))+'</td>';
+      bodyHtml+='<td style="direction:ltr;text-align:right;font-size:11px;">'+esc(m.idNumber||'')+'</td>';
+      bodyHtml+='<td class="num">'+(mP2||'<span style="color:#cbd5e1;">—</span>')+'</td>';
+      bodyHtml+='<td class="num">'+(mP1||'<span style="color:#cbd5e1;">—</span>')+'</td>';
+      bodyHtml+='<td class="total-cell">'+mT+'</td>';
+      bodyHtml+='<td class="num">'+(mG||'<span style="color:#cbd5e1;">—</span>')+'</td>';
+      bodyHtml+='<td style="font-size:10px;color:var(--muted);">'+esc(m.performerType||'—')+'</td>';
+      bodyHtml+='<td style="font-size:10px;text-align:center;">'+(m.isAccompaniment?'✅':'—')+'</td></tr>';
+      if(mt==='רגיל'){rS+=mT;rP1+=mP1;rP2+=mP2;}
+      else if(mt==='כוח פנים'){iS+=mT;iP1+=mP1;iP2+=mP2;}
+      else{aS+=mT;aP1+=mP1;aP2+=mP2;}
+    }
+    bodyHtml+='</tbody></table></div>';
+    bodyHtml+='<div class="summary-row">';
+    bodyHtml+=smI('רגילות',rS,'P1:'+rP1+' P2:'+rP2);
+    bodyHtml+=smI('🏠 כוח פנים',iS,'P1:'+iP1+' P2:'+iP2);
+    bodyHtml+=smI('🕐 ליווי',aS,'P1:'+aP1+' P2:'+aP2);
+    bodyHtml+=smI('סה״כ אקדמי',rS+iS,'/ '+(s.academicHours||0));
+    bodyHtml+='</div>';
+    // Validations
+    for(var k=0;k<insts.length;k++){
+      var mi=insts[k],mt2=getMentorType(mi);
+      if(mt2!=='כוח פנים'&&mt2!=='שעות ליווי')continue;
+      var sp1=parseFloat(mi.period1Hours)||0,sp2=parseFloat(mi.period2Hours)||0,spS=sp1+sp2,fx=mi.totalAcademicHours||0;
+      if(spS>0&&Math.abs(spS-fx)>0.01){bodyHtml+='<div class="warn warn-err">⚠️ '+esc(mi.fullName)+': תקופות ('+spS+') ≠ סה״כ קבוע ('+fx+')</div>';}
+    }
+    if(s.academicHours>0){var mT2=rS+iS;if(Math.abs(mT2-s.academicHours)>0.01&&(rS>0||iS>0)){bodyHtml+='<div class="warn warn-warn">⚠️ רגיל+כוח פנים ('+mT2+') ≠ אקדמיות ('+s.academicHours+')</div>';}}
+  }
+  bodyHtml += '</div>';
+
+  // --- Section: Variable Mapping ---
+  bodyHtml += '<div class="section"><div class="section-title"><span class="icon">🔗</span> מיפוי משתנים פנימיים — איך כל שדה מתחבר</div>';
+  bodyHtml += buildVarTable(s, insts);
+  bodyHtml += '</div>';
+
+  // --- Section: Raw JSON ---
+  bodyHtml += '<div class="section"><div class="section-title"><span class="icon">🔧</span> JSON גולמי</div>';
+  bodyHtml += '<button class="btn-raw" onclick="toggleRaw(\''+rawId+'_sol\')">פתרון למידה (solution)</button>';
+  bodyHtml += '<button class="btn-raw" onclick="toggleRaw(\''+rawId+'_insts\')">מנחים (instructors)</button>';
+  bodyHtml += '<pre class="raw-block" id="'+rawId+'_sol">'+esc(JSON.stringify(s,null,2))+'</pre>';
+  bodyHtml += '<pre class="raw-block" id="'+rawId+'_insts">'+esc(JSON.stringify(insts,null,2))+'</pre>';
+  bodyHtml += '</div>';
+
+  bodyHtml += '</div>';
+
+  return '<div class="sol-card" id="'+cardId+'">' + headerHtml + bodyHtml + '</div>';
+}
+
+// ==================== UI HELPERS ====================
+function toggleCard(cardId, bodyId) {
+  var card = document.getElementById(cardId);
+  var body = document.getElementById(bodyId);
+  if (!card || !body) return;
+  var hdr = card.querySelector('.sol-header');
+  body.classList.toggle('open');
+  if (hdr) hdr.classList.toggle('open');
+}
+
+function toggleAll(hide) {
+  var bodies = document.querySelectorAll('.sol-body');
+  var hdrs = document.querySelectorAll('.sol-header');
+  for (var i = 0; i < bodies.length; i++) {
+    if (hide) { bodies[i].classList.remove('open'); hdrs[i].classList.remove('open'); }
+    else { bodies[i].classList.add('open'); hdrs[i].classList.add('open'); }
+  }
+}
+
+function toggleRaw(id) {
+  var el = document.getElementById(id);
+  if (el) el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+
+function showBanner(msg) {
+  _dataSource = msg;
+  document.getElementById('srcText').textContent = msg;
+  document.getElementById('srcBanner').classList.remove('hidden');
+}
+
+// ==================== RENDER ====================
+function render() {
+  loadPeriods();
+  var solutions = ls('solutions').filter(function(s){return !s._deleted;});
+  document.getElementById('countLabel').textContent = solutions.length + ' פתרונות';
+
+  var out = document.getElementById('output');
+  if (solutions.length === 0) {
+    out.innerHTML = '<div class="empty-state">'+
+      '<strong>0</strong>'+
+      'לא נמצאו פתרונות למידה'+
+      '<p>המערכת ריקה. בחר אחת מהאפשרויות למעלה:</p>'+
+      '<p style="font-size:12px;margin-top:4px;">🧪 טען נתוני דוגמה &nbsp;|&nbsp; 📂 ייבוא JSON &nbsp;|&nbsp; 🔄 טען מהמערכת (localStorage)</p>'+
+      '</div>';
+  } else {
+    var html = '';
+    for (var i = 0; i < solutions.length; i++) {
+      html += buildCard(solutions[i], i);
+    }
+    out.innerHTML = html;
+  }
+}
+
+// ==================== LOAD FROM SYSTEM (localStorage) ====================
+function tryLoadFromSystem() {
+  _store = {}; // clear override store, fall back to native localStorage
+  var sols = lsNative('solutions').filter(function(s){return !s._deleted;});
+  if (sols.length === 0) {
+    alert('אין נתונים ב-localStorage. נסה לטעון נתוני דוגמה או לייבא JSON.');
+    return;
+  }
+  showBanner('מציג נתונים מהמערכת (localStorage) — ' + sols.length + ' פתרונות');
+  render();
+}
+
+// ==================== FILE IMPORT ====================
+function triggerImport() {
+  document.getElementById('fileImport').click();
+}
+
+function handleFileImport(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      var data = JSON.parse(ev.target.result);
+      if (Array.isArray(data)) {
+        // Assume it's solutions array
+        _store = {};
+        _store['solutions'] = data;
+        showBanner('מציג ' + data.length + ' פתרונות מקובץ: ' + file.name + ' (מנחים לא כלולים — יש לייבא גם solution_instructors)');
+      } else if (data && typeof data === 'object') {
+        // Assume key-value map
+        _store = {};
+        for (var k in data) {
+          if (data.hasOwnProperty(k)) _store[k] = data[k];
+        }
+        var solCount = (data.solutions || []).filter(function(s){return !s._deleted;}).length;
+        showBanner('מציג נתונים מקובץ: ' + file.name + ' — ' + solCount + ' פתרונות, ' + Object.keys(data).length + ' טבלאות');
+      }
+      render();
+    } catch (err) {
+      alert('שגיאה בפענוח JSON: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ==================== DEMO DATA ====================
+function loadDemoData() {
+  _store = {
+    periods: [
+      { id:'p001', hebrewYear:'תשפ"ו', englishYear:'2025-2026',
+        period1Label:'תקופה א׳', period1Start:'2025-09-01', period1End:'2026-01-31',
+        period2Label:'תקופה ב׳', period2Start:'2026-02-01', period2End:'2026-08-31',
+        isActive:true }
+    ],
+    lookup_domains: [
+      {id:'ld_001',value:'תחום דעת',label:'תחום דעת',isActive:true},
+      {id:'ld_004',value:'תוכניות ייעודיות',label:'תוכניות ייעודיות',isActive:true},
+      {id:'ld_005',value:'בית ספרי',label:'בית ספרי',isActive:true}
+    ],
+    lookup_budget_types: [
+      {id:'lbt_001',value:'תקציב רגיל',label:'תקציב רגיל',isActive:true},
+      {id:'lbt_002',value:'חומש',label:'חומש',isActive:true},
+      {id:'lbt_003',value:'לא מתוקצב',label:'לא מתוקצב',isActive:true}
+    ],
+    lookup_meeting_types: [
+      {id:'lmt_001',value:'פרטני',label:'פרטני',isActive:true},
+      {id:'lmt_002',value:'קבוצתי',label:'קבוצתי',isActive:true},
+      {id:'lmt_003',value:'מרוכז',label:'מרוכז',isActive:true}
+    ],
+    lookup_week_days: [
+      {id:'lwd_001',value:'ראשון',label:'ראשון',isActive:true},
+      {id:'lwd_002',value:'שני',label:'שני',isActive:true},
+      {id:'lwd_003',value:'שלישי',label:'שלישי',isActive:true},
+      {id:'lwd_004',value:'רביעי',label:'רביעי',isActive:true},
+      {id:'lwd_005',value:'חמישי',label:'חמישי',isActive:true}
+    ],
+    lookup_education_stages: [
+      {id:'les_001',value:'יסודי',label:'יסודי',isActive:true},
+      {id:'les_002',value:'חטיבת ביניים',label:'חטיבת ביניים',isActive:true},
+      {id:'les_003',value:'עליון',label:'עליון',isActive:true}
+    ],
+    lookup_education_types: [
+      {id:'let_001',value:'ממלכתי',label:'ממלכתי',isActive:true},
+      {id:'let_002',value:'ממלכתי דתי',label:'ממלכתי דתי',isActive:true}
+    ],
+    lookup_responsibility_types: [
+      {id:'lrt_001',value:'אחריות מלאה',label:'אחריות מלאה',isActive:true},
+      {id:'lrt_002',value:'שותפות',label:'שותפות',isActive:true}
+    ],
+    guides_repo: [
+      {id:'guide_repo_001',idNumber:'11111111',fullName:'רחל כהן',phone:'054-1111111',email:'rachel@education.gov.il',position:'מנחה ראשית – מתמטיקה',isActive:true},
+      {id:'guide_repo_002',idNumber:'22222222',fullName:'דוד לוי',phone:'054-2222222',email:'david@education.gov.il',position:'מנחה ראשי – היסטוריה',isActive:true},
+      {id:'guide_repo_003',idNumber:'33333333',fullName:'שרה אברהם',phone:'054-3333333',email:'sara@education.gov.il',position:'מנחה ראשית – עברית',isActive:true}
+    ],
+    solutions: [
+      {
+        id:'sol_demo_001', name:'מתמטיקה — חיזוק חטיבת ביניים', solutionNumber:'SOL-2025-001',
+        schoolName:'בית ספר אל-מותנבי', description:'חיזוק יכולות מתמטיות בחטיבת ביניים',
+        responsibilityType:'lrt_001', topicType:'ld_001', topic:'מתמטיקה',
+        guideId:'guide_repo_001', educationStage:'les_002', educationType:'let_001',
+        meetingType:'lmt_002', weekDay:'lwd_003',
+        startDate:'2025-09-01', endDate:'2026-06-30',
+        academicHours:60, budgetType:'מתוקצב', budgetTypeValue:'lbt_001',
+        budgetedHours:60, internalForceHours:12, accBudgetedHours:8,
+        period1Hours:24, period2Hours:36,
+        showInCatalog:true, showInPublicCatalog:false, notes:'פתרון למידה לחיזוק',
+        createdAt:'2025-08-15T00:00:00.000Z', updatedAt:'2025-08-15T00:00:00.000Z'
+      },
+      {
+        id:'sol_demo_002', name:'עברית — מומחיות כתיבה', solutionNumber:'SOL-2025-002',
+        schoolName:'בית ספר עין הוד', description:'פיתוח מיומנויות כתיבה',
+        responsibilityType:'lrt_001', topicType:'ld_001', topic:'לשון עברית',
+        guideId:'guide_repo_003', educationStage:'les_001', educationType:'let_001',
+        meetingType:'lmt_001', weekDay:'lwd_001',
+        startDate:'2025-09-01', endDate:'2026-06-30',
+        academicHours:40, budgetType:'מתוקצב', budgetTypeValue:'lbt_002',
+        budgetedHours:40, internalForceHours:0, accBudgetedHours:10,
+        period1Hours:16, period2Hours:24,
+        showInCatalog:true, showInPublicCatalog:false, notes:'',
+        createdAt:'2025-08-20T00:00:00.000Z', updatedAt:'2025-08-20T00:00:00.000Z'
+      },
+      {
+        id:'sol_demo_003', name:'תוכנית ייעודית — חשיבה ביקורתית', solutionNumber:'SOL-2025-003',
+        schoolName:'בית ספר גבעתיים', description:'פיתוח חשיבה ביקורתית באמצעות פרויקטים',
+        responsibilityType:'lrt_002', topicType:'ld_004', topic:'חשיבה ביקורתית',
+        guideId:'guide_repo_002', educationStage:'les_003', educationType:'let_001',
+        meetingType:'lmt_003', weekDay:'lwd_005',
+        startDate:'2025-11-01', endDate:'2026-05-31',
+        academicHours:80, budgetType:'מתוקצב', budgetTypeValue:'lbt_001',
+        budgetedHours:80, internalForceHours:20, accBudgetedHours:15,
+        period1Hours:32, period2Hours:48,
+        showInCatalog:true, showInPublicCatalog:true, notes:'תוכנית ייעודית חדשה',
+        createdAt:'2025-09-01T00:00:00.000Z', updatedAt:'2025-09-01T00:00:00.000Z'
+      }
+    ],
+    solution_instructors: [
+      // Solution 1 — 2 regular + 1 internal force + 1 accompaniment
+      {id:'si_001',solutionId:'sol_demo_001',fullName:'יוסי ישראלי',idNumber:'12345678',performerType:'',isAccompaniment:false,period1Hours:14,period2Hours:22,totalAcademicHours:36,guideHours:4},
+      {id:'si_002',solutionId:'sol_demo_001',fullName:'מרים אהרון',idNumber:'23456789',performerType:'',isAccompaniment:false,period1Hours:10,period2Hours:14,totalAcademicHours:24,guideHours:2},
+      {id:'si_003',solutionId:'sol_demo_001',fullName:'כוח פנים',idNumber:'',performerType:'כוח פנים',isAccompaniment:false,period1Hours:0,period2Hours:0,totalAcademicHours:12,guideHours:0},
+      {id:'si_004',solutionId:'sol_demo_001',fullName:'שעות ליווי',idNumber:'',performerType:'',isAccompaniment:true,period1Hours:0,period2Hours:0,totalAcademicHours:8,guideHours:0},
+      // Solution 2 — 1 regular + 1 accompaniment
+      {id:'si_005',solutionId:'sol_demo_002',fullName:'אהוד ברק',idNumber:'34567890',performerType:'',isAccompaniment:false,period1Hours:16,period2Hours:24,totalAcademicHours:40,guideHours:3},
+      {id:'si_006',solutionId:'sol_demo_002',fullName:'שעות ליווי',idNumber:'',performerType:'',isAccompaniment:true,period1Hours:0,period2Hours:0,totalAcademicHours:10,guideHours:0},
+      // Solution 3 — 3 regular + 1 internal force + 1 accompaniment
+      {id:'si_007',solutionId:'sol_demo_003',fullName:'נעמי שלום',idNumber:'45678901',performerType:'',isAccompaniment:false,period1Hours:16,period2Hours:24,totalAcademicHours:40,guideHours:5},
+      {id:'si_008',solutionId:'sol_demo_003',fullName:'אורן כהן',idNumber:'56789012',performerType:'',isAccompaniment:false,period1Hours:10,period2Hours:10,totalAcademicHours:20,guideHours:2},
+      {id:'si_009',solutionId:'sol_demo_003',fullName:'כוח פנים',idNumber:'',performerType:'כוח פנים',isAccompaniment:false,period1Hours:0,period2Hours:0,totalAcademicHours:20,guideHours:0},
+      {id:'si_010',solutionId:'sol_demo_003',fullName:'שעות ליווי',idNumber:'',performerType:'',isAccompaniment:true,period1Hours:0,period2Hours:0,totalAcademicHours:15,guideHours:0}
+    ]
+  };
+
+  var solCount = _store.solutions.filter(function(s){return !s._deleted;}).length;
+  showBanner('מציג נתוני דוגמה — ' + solCount + ' פתרונות למידה (3 סוגי מנחים: רגיל, כוח פנים, שעות ליווי)');
+  render();
+}
+
+// ==================== INIT ====================
+render();
+</script>
+</body>
+</html>

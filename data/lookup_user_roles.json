@@ -1,0 +1,6 @@
+[
+  { "id": "lur_001", "value": "admin", "label": "מנהל מערכת", "labelAr": "مدير النظام", "order": 1, "isActive": true },
+  { "id": "lur_002", "value": "operator", "label": "מפעיל מערכת", "labelAr": "مشغل النظام", "order": 2, "isActive": true },
+  { "id": "lur_003", "value": "team_member", "label": "חבר בצוות מוביל", "labelAr": "عضو في فريق قيادي", "order": 3, "isActive": true },
+  { "id": "lur_004", "value": "guide", "label": "מדריך פסג\"ה", "labelAr": "مرشد بسغ\"ه", "order": 4, "isActive": true }
+]

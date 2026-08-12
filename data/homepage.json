@@ -1,0 +1,51 @@
+{
+  "siteName": {
+    "he": "מרכז פיתוח סגלי הוראה",
+    "ar": "مركز تطوير طواقم التربية والتعليم"
+  },
+  "logo": "",
+  "navItems": [
+    {
+      "id": "hpnav_001",
+      "labelHe": "לוח בקרה",
+      "labelAr": "لوحة التحكم",
+      "url": "./dashboard.html",
+      "order": 1,
+      "isActive": true
+    }
+  ],
+  "sidebarItems": [
+    {
+      "id": "hpsb_1784913447200",
+      "labelHe": "קטלוג פתרונות הלמידה",
+      "labelAr": "كتالوج الحلول التعليمية",
+      "url": "./catalog.html",
+      "order": 1,
+      "isActive": true
+    },
+    {
+      "id": "hpsb_1784913485660",
+      "labelHe": "צוות המרכז",
+      "labelAr": "طاقم المركز",
+      "url": "./team.html",
+      "order": 2,
+      "isActive": true
+    },
+    {
+      "id": "hpsb_1784913529351",
+      "labelHe": "שאלה ותשובה",
+      "labelAr": "سؤال وجواب",
+      "url": "./faq.html",
+      "order": 3,
+      "isActive": true
+    }
+  ],
+  "mainContent": {
+    "he": "ברוכים הבאים למצפן נט",
+    "ar": "مرحباً بكم في بوصلة نت"
+  },
+  "footerText": {
+    "he": "© כל הזכויות שמורות – מרכז פיתוח סגלי הוראה - מזרח ירושלים",
+    "ar": "© جميع الحقوق محفوظة – مركز تطوير طواقم التربية والتعليم - شرقي القدس"
+  }
+}

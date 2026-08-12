@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>كتالوج الحلول التعليمية للعام 2026-2027</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>">
+    <style>
+        /* Catalog-specific overrides — standalone page (no sidebar/dashboard shell) */
+        body {
+            font-family: 'Noto Sans Arabic', sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-800);
+            margin: 0;
+            direction: rtl;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Apply Cairo font for headings in Arabic */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Cairo', 'Noto Sans Arabic', sans-serif;
+        }
+
+        /* ── Header ── */
+        .catalog-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(0,0,0,.12);
+        }
+        .catalog-header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .catalog-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            text-decoration: none;
+        }
+        .catalog-logo-icon {
+            font-size: 32px;
+            line-height: 1;
+        }
+        .catalog-logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+        .catalog-logo-text .name-ar {
+            font-size: 20px;
+            font-weight: 800;
+            line-height: 1.2;
+            color: #fff;
+        }
+        .catalog-logo-text .name-he {
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 1.2;
+            color: rgba(255,255,255,.8);
+        }
+
+        .btn-back {
+            background: rgba(255,255,255,.18);
+            border: 1px solid rgba(255,255,255,.3);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            font-family: 'Noto Sans Arabic', 'Tajawal', sans-serif;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-back:hover {
+            background: rgba(255,255,255,.3);
+        }
+
+        /* ── Page Content ── */
+        .catalog-content {
+            flex: 1;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* ── Page Title ── */
+        .catalog-page-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--gray-800);
+            margin: 0 0 24px 0;
+            text-align: center;
+        }
+
+        /* ── Search ── */
+        .catalog-search {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .catalog-search input {
+            width: 100%;
+            padding: 16px 20px 16px 48px;
+            font-size: 16px;
+            border-radius: var(--border-radius-lg);
+            border: 2px solid var(--gray-200);
+            background: #fff;
+            transition: all .2s;
+            font-family: 'Noto Sans Arabic', 'Tajawal', sans-serif;
+            box-sizing: border-box;
+        }
+        .catalog-search input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(12,167,170,.15);
+        }
+        .catalog-search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: var(--gray-400);
+            pointer-events: none;
+        }
+
+        /* ── Filters ── */
+        .catalog-filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        /* ── Card Grid ── */
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        /* ── Catalog Card ── */
+        .catalog-card {
+            background: #fff;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            border: 1px solid var(--gray-100);
+            transition: all .25s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+        .catalog-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-3px);
+        }
+
+        /* Colored header strip */
+        .catalog-card-strip {
+            padding: 18px 16px;
+            text-align: center;
+            color: #fff;
+            position: relative;
+            min-height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .catalog-card-strip .strip-label {
+            font-size: 16px;
+            font-weight: 700;
+            text-shadow: 0 1px 3px rgba(0,0,0,.2);
+            line-height: 1.4;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .catalog-card-body {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .catalog-card-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        .catalog-card-guide {
+            font-size: 14px;
+            color: var(--gray-500);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .catalog-card-guide .guide-icon {
+            color: var(--primary);
+        }
+        .catalog-card-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        /* Mentor tags styling - displayed as separate tags */
+        .catalog-card-mentors {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .mentor-tag {
+            display: inline-block;
+            background: rgba(12, 167, 170, 0.1);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid rgba(12, 167, 170, 0.2);
+        }
+        .catalog-card-footer {
+            padding: 14px 20px;
+            border-top: 1px solid var(--gray-100);
+            background: var(--gray-50);
+        }
+
+        /* ── Empty State ── */
+        .catalog-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+        }
+        .catalog-empty-icon {
+            font-size: 56px;
+            margin-bottom: 16px;
+        }
+        .catalog-empty-text {
+            font-size: 18px;
+            color: var(--gray-500);
+            font-weight: 600;
+        }
+
+        /* ── Detail Modal — ensure z-index above toast-container (2000) ── */
+        #detailModal {
+            z-index: 3000 !important;
+        }
+        /* Ensure toast items remain interactive when added */
+        #toastContainer .toast {
+            pointer-events: auto;
+        }
+        .detail-row {
+            display: flex;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--gray-100);
+            gap: 12px;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: 700;
+            color: var(--gray-600);
+            min-width: 120px;
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+        .detail-value {
+            color: var(--gray-800);
+            font-size: 14px;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+        .detail-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        /* ── Footer ── */
+        .catalog-footer {
+            background: var(--gray-800);
+            color: rgba(255,255,255,.6);
+            text-align: center;
+            padding: 20px;
+            font-size: 13px;
+            margin-top: auto;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 1024px) {
+            .catalog-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 640px) {
+            .catalog-grid {
+                grid-template-columns: 1fr;
+            }
+            .catalog-header-inner {
+                padding: 12px 16px;
+            }
+            .catalog-content {
+                padding: 16px;
+            }
+            .catalog-page-title {
+                font-size: 22px;
+            }
+            .catalog-filters {
+                grid-template-columns: 1fr;
+            }
+            .modal {
+                max-width: 100%;
+                margin: 8px;
+                max-height: 95vh;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="catalog-header">
+        <div class="catalog-header-inner">
+            <a class="catalog-logo" href="./index.html">
+                <span class="catalog-logo-icon" id="globalHeaderLogo">🧭</span>
+                <span class="catalog-logo-text">
+                    <span class="name-ar" id="globalHeaderNameAr">بوصلة نت</span>
+                    <span class="name-he" id="globalHeaderNameHe">מצפן נט</span>
+                </span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="catalog-content">
+        <h1 class="catalog-page-title" id="pageTitle"></h1>
+
+        <!-- Search -->
+        <div class="catalog-search">
+            <input type="text" id="searchInput" class="form-input" autocomplete="off">
+            <span class="catalog-search-icon">🔍</span>
+        </div>
+
+        <!-- Filters -->
+        <div class="catalog-filters">
+            <select id="filterTopicType" class="form-select"></select>
+            <select id="filterEducationStage" class="form-select"></select>
+            <select id="filterMeetingType" class="form-select"></select>
+        </div>
+
+        <!-- Card Grid -->
+        <div class="catalog-grid" id="catalogGrid"></div>
+    </main>
+
+    <!-- Detail Modal -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal" role="dialog" aria-modal="true">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle"></h2>
+                <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer" id="modalFooter"></div>
+        </div>
+    </div>
+
+    <!-- Toast Container — hidden from pointer events when empty -->
+    <div class="toast-container" id="toastContainer" style="pointer-events:none;"></div>
+
+    <!-- Footer -->
+    <footer class="catalog-footer" id="globalFooterText"></footer>
+
+    <!-- Scripts -->
+    <script src="./js/data.js?v=4.4.0"></script>
+    <script src="./js/global-ui.js?v=1.0.0"></script>
+    <script src="./js/catalog.js?v=4.9.0"></script>
+</body>
+</html>

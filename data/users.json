@@ -1,0 +1,13 @@
+[
+  {
+    "id": "usr_admin_001",
+    "username": "admin",
+    "password": "admin123",
+    "fullName": "מנהל מערכת",
+    "email": "admin@matspanet.co.il",
+    "role": "system_admin",
+    "isActive": true,
+    "createdAt": "2024-09-01T00:00:00.000Z",
+    "updatedAt": "2024-09-01T00:00:00.000Z"
+  }
+]

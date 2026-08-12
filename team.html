@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوصلة نت - فريق المرشدين</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800;900&family=Tajawal:wght@200;300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>">
+    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Noto Sans Arabic', 'Tajawal', sans-serif;
+            min-height: 100vh;
+            background: var(--gray-50, #f3f3f3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Page Header ── */
+        .team-header {
+            background: linear-gradient(135deg, var(--primary, #0ca7aa) 0%, var(--primary-dark, #09787a) 100%);
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 16px rgba(0,0,0,.06);
+        }
+        .team-header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .team-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #fff;
+            text-decoration: none;
+        }
+        .team-logo-icon { font-size: 32px; line-height: 1; }
+        .team-logo-text { font-size: 20px; font-weight: 800; color: #fff; }
+        .team-logo-sub { font-size: 13px; color: rgba(255,255,255,.75); font-weight: 500; }
+        .btn-back {
+            background: rgba(255,255,255,.18);
+            border: 1px solid rgba(255,255,255,.3);
+            color: #fff;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            font-family: 'Noto Sans Arabic', 'Tajawal', sans-serif;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-back:hover { background: rgba(255,255,255,.3); }
+
+        /* ── Hero Title ── */
+        .team-hero {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 32px 24px 8px;
+            text-align: center;
+        }
+        .team-hero-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--gray-700, #24343f);
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        }
+        .team-hero-sub {
+            font-size: 15px;
+            color: var(--gray-400, #777777);
+            font-weight: 500;
+        }
+
+        /* ── Dedicated Search Section ── */
+        .search-section {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px 24px 0;
+        }
+        .search-wrapper {
+            position: relative;
+            max-width: 560px;
+            margin: 0 auto;
+        }
+        .search-wrapper .search-icon {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 22px;
+            pointer-events: none;
+            color: var(--gray-300, #999999);
+            transition: color .2s;
+        }
+        .search-wrapper input {
+            width: 100%;
+            padding: 16px 50px 16px 48px;
+            border-radius: 16px;
+            border: 2px solid var(--gray-200, #e5e5e5);
+            background: #fff;
+            color: var(--gray-800, #0f1820);
+            font-size: 16px;
+            font-family: 'Noto Sans Arabic', 'Tajawal', sans-serif;
+            transition: all .25s;
+            box-shadow: 0 2px 12px rgba(0,0,0,.04);
+        }
+        .search-wrapper input::placeholder { color: var(--gray-300, #999999); }
+        .search-wrapper input:focus {
+            outline: none;
+            border-color: var(--primary, #0ca7aa);
+            box-shadow: 0 4px 20px rgba(12,167,170,.12);
+        }
+        .search-wrapper input:focus ~ .search-icon { color: var(--primary, #0ca7aa); }
+        .search-clear {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--gray-300, #b1b1b1);
+            padding: 4px;
+            line-height: 1;
+            display: none;
+            transition: color .2s;
+        }
+        .search-clear:hover { color: var(--danger, #e53e3e); }
+        .search-clear.visible { display: block; }
+        .search-results-count {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 14px;
+            color: var(--gray-400, #666666);
+            font-weight: 500;
+            min-height: 22px;
+        }
+
+        /* ── Grid ── */
+        .team-content {
+            flex: 1;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 28px 24px 40px;
+        }
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        /* ── Card (Snyk-inspired) ── */
+        .guide-card {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 2px 12px rgba(0,0,0,.06);
+            overflow: hidden;
+            border: 1px solid var(--gray-100, #f2f2f2);
+            transition: all .3s cubic-bezier(.4,0,.2,1);
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            position: relative;
+        }
+        .guide-card:hover {
+            box-shadow: 0 12px 32px rgba(12,167,170,.18);
+            transform: translateY(-4px);
+            border-color: rgba(12,167,170,.2);
+        }
+        .guide-card:focus-within {
+            box-shadow: 0 12px 32px rgba(12,167,170,.18);
+        }
+
+        /* ── Card Header (colored, 130px) ── */
+        .card-header {
+            height: 130px;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary, #0ca7aa) 0%, var(--primary-dark, #09787a) 100%);
+            overflow: visible;
+        }
+        .card-header::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 80% 20%, rgba(255,255,255,.18) 0%, transparent 50%),
+                radial-gradient(circle at 20% 80%, rgba(255,255,255,.12) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        /* Avatar — overlaps header/body */
+        .card-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 4px solid #fff;
+            object-fit: cover;
+            box-shadow: 0 6px 20px rgba(0,0,0,.22);
+            background: #fff;
+            position: relative;
+            z-index: 2;
+            margin-bottom: -50px; /* half of height — overlap into body */
+            flex-shrink: 0;
+        }
+        .card-avatar-fallback {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 4px solid #fff;
+            background: linear-gradient(135deg, #0e8a8d 0%, #0a5c5e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 20px rgba(0,0,0,.22);
+            margin-bottom: -50px;
+            position: relative;
+            z-index: 2;
+            flex-shrink: 0;
+        }
+        .card-avatar-fallback span {
+            font-size: 38px;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+            letter-spacing: -1px;
+            text-shadow: 0 1px 3px rgba(0,0,0,.2);
+        }
+
+        /* ── Card Body ── */
+        .card-body {
+            padding: 58px 20px 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 4px;
+        }
+        .card-name {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--gray-700, #24343f);
+            line-height: 1.4;
+            word-break: break-word;
+            margin: 0;
+        }
+        .card-name-ar {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--gray-500, #555555);
+            line-height: 1.4;
+            margin: 0;
+            direction: rtl;
+            word-break: break-word;
+        }
+        .card-position {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--gray-400, #777777);
+            line-height: 1.5;
+            word-break: break-word;
+            min-height: 20px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .card-details-btn {
+            margin-top: 14px;
+            background: var(--primary-bg, #e9f6fb);
+            color: var(--primary-dark, #09787a);
+            border: 1.5px solid rgba(12,167,170,.2);
+            padding: 8px 22px;
+            border-radius: 22px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .2s;
+            font-family: 'Noto Sans Arabic', 'Tajawal', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .card-details-btn:hover,
+        .guide-card:hover .card-details-btn {
+            background: var(--primary, #0ca7aa);
+            color: #fff;
+            border-color: var(--primary, #0ca7aa);
+            box-shadow: 0 4px 12px rgba(12,167,170,.3);
+        }
+        .card-details-btn .btn-arrow {
+            font-size: 14px;
+            transition: transform .2s;
+        }
+        .guide-card:hover .card-details-btn .btn-arrow {
+            transform: translateX(-3px);
+        }
+
+        /* ── Empty State ── */
+        .team-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 80px 20px;
+        }
+        .team-empty-icon { font-size: 64px; margin-bottom: 16px; opacity: .7; }
+        .team-empty-text { font-size: 20px; color: var(--gray-400, #999999); font-weight: 700; }
+        .team-empty-sub { font-size: 14px; color: var(--gray-300, #b1b1b1); margin-top: 8px; }
+
+        /* ── Loading Skeleton ── */
+        .card-skeleton .card-header { background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
+        .card-skeleton .card-avatar-fallback { background: #e0e0e0; }
+        .card-skeleton .card-avatar-fallback span { visibility: hidden; }
+        .card-skeleton .sk-line {
+            height: 14px; background: #eee; border-radius: 6px; margin: 4px auto;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite;
+        }
+        .card-skeleton .sk-1 { width: 60%; }
+        .card-skeleton .sk-2 { width: 40%; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* ── Footer ── */
+        .team-footer {
+            text-align: center;
+            padding: 18px;
+            color: var(--gray-300, #999999);
+            font-size: 12px;
+            border-top: 1px solid var(--gray-100, #f2f2f2);
+            background: rgba(255,255,255,.7);
+            flex-shrink: 0;
+        }
+
+        /* ── Modal (Landscape Business Card) ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15,24,32,.55);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity .25s, visibility .25s;
+        }
+        .modal-overlay.is-open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-card {
+            background: #fff;
+            border-radius: 22px;
+            width: 100%;
+            max-width: 700px;
+            max-height: calc(100vh - 40px);
+            overflow: hidden;
+            box-shadow: 0 24px 60px rgba(0,0,0,.25);
+            transform: scale(.92) translateY(16px);
+            transition: transform .3s cubic-bezier(.4,0,.2,1);
+            position: relative;
+        }
+        .modal-overlay.is-open .modal-card {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #fff;
+            border: 1.5px solid var(--gray-200, #e5e5e5);
+            color: var(--gray-500, #555555);
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: all .2s;
+            line-height: 1;
+            font-family: inherit;
+            box-shadow: 0 2px 8px rgba(0,0,0,.1);
+        }
+        .modal-close:hover {
+            background: var(--danger, #e53e3e);
+            color: #fff;
+            border-color: var(--danger, #e53e3e);
+            transform: rotate(90deg);
+        }
+
+        /* Landscape flex container */
+        .modal-content {
+            display: flex;
+            flex-direction: row;
+            min-height: 340px;
+        }
+
+        /* Right side — Image (in RTL this is the start) */
+        .modal-image-side {
+            width: 260px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--primary, #0ca7aa) 0%, var(--primary-dark, #09787a) 100%);
+        }
+        .modal-image-side::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 80% 20%, rgba(255,255,255,.18) 0%, transparent 50%),
+                radial-gradient(circle at 20% 80%, rgba(255,255,255,.12) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        .modal-photo {
+            width: 220px;
+            height: 280px;
+            border-radius: 18px;
+            border: none;
+            object-fit: cover;
+            box-shadow: 0 8px 24px rgba(0,0,0,.2);
+            background: #fff;
+            position: relative;
+            z-index: 2;
+        }
+        .modal-photo-fallback {
+            width: 220px;
+            height: 280px;
+            border-radius: 18px;
+            border: none;
+            background: rgba(255,255,255,.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,.2);
+            position: relative;
+            z-index: 2;
+        }
+        .modal-photo-fallback span {
+            font-size: 64px;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+            letter-spacing: -1px;
+            text-shadow: 0 2px 6px rgba(0,0,0,.3);
+        }
+
+        /* Left side — Details (in RTL this is the end) */
+        .modal-details-side {
+            flex: 1;
+            padding: 32px 28px 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            text-align: right;
+        }
+        .modal-name {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--gray-700, #24343f);
+            line-height: 1.35;
+            margin: 0 0 2px;
+            word-break: break-word;
+        }
+        .modal-name-ar {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--gray-500, #555555);
+            line-height: 1.5;
+            margin: 0 0 12px;
+            direction: rtl;
+            word-break: break-word;
+        }
+        .modal-position-badge {
+            display: inline-block;
+            background: var(--primary-bg, #e9f6fb);
+            color: var(--primary-dark, #09787a);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            margin: 0 0 18px;
+            line-height: 1.5;
+            max-width: 100%;
+            word-break: break-word;
+            align-self: flex-start;
+        }
+
+        /* Detail rows */
+        .modal-detail-rows {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .modal-detail-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 14px;
+            background: var(--gray-50, #f7f7f7);
+            border-radius: 12px;
+            transition: background .2s;
+        }
+        .modal-detail-row:hover {
+            background: var(--gray-100, #f0f0f0);
+        }
+        .modal-detail-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+            line-height: 1.4;
+        }
+        .modal-detail-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+        .modal-detail-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--gray-400, #999999);
+            text-transform: uppercase;
+            letter-spacing: .3px;
+        }
+        .modal-detail-value {
+            font-size: 14px;
+            color: var(--gray-700, #24343f);
+            font-weight: 500;
+            line-height: 1.5;
+            word-break: break-word;
+            direction: ltr;
+            unicode-bidi: embed;
+            text-align: right;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: auto;
+            flex-wrap: wrap;
+        }
+        .modal-btn {
+            flex: 1;
+            min-width: 140px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all .2s;
+            font-family: 'Noto Sans Arabic', 'Tajawal', sans-serif;
+            border: none;
+            cursor: pointer;
+        }
+        .modal-btn .btn-icon { font-size: 17px; }
+        .modal-btn .btn-value {
+            direction: ltr;
+            unicode-bidi: embed;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            min-width: 0;
+            flex: 1;
+        }
+        .modal-btn--email .btn-value {
+            font-size: 12.5px;
+        }
+        .modal-btn--whatsapp {
+            background: linear-gradient(135deg, #25d366, #128c7e);
+            color: #fff;
+        }
+        .modal-btn--whatsapp:hover {
+            box-shadow: 0 6px 18px rgba(37,211,102,.4);
+            transform: translateY(-2px);
+            color: #fff;
+        }
+        .modal-btn--full {
+            min-width: 0;
+            flex: 1 1 100%;
+        }
+        .modal-btn--email {
+            background: var(--primary-bg, #e9f6fb);
+            color: var(--primary-dark, #09787a);
+            border: 1.5px solid rgba(12,167,170,.2);
+        }
+        .modal-btn--email:hover {
+            background: var(--primary, #0ca7aa);
+            color: #fff;
+            border-color: var(--primary, #0ca7aa);
+            transform: translateY(-2px);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .team-header-inner { flex-wrap: wrap; }
+            .team-grid { grid-template-columns: 1fr; gap: 18px; }
+            .team-hero { padding: 24px 16px 4px; }
+            .team-hero-title { font-size: 24px; }
+            .search-section { padding: 16px 16px 0; }
+            .search-wrapper { max-width: 100%; }
+            .search-wrapper input { padding: 14px 44px 14px 42px; font-size: 15px; }
+            .team-content { padding: 22px 16px 32px; }
+            .modal-card { max-width: 100%; border-radius: 18px; }
+            .modal-content { flex-direction: column; min-height: auto; }
+            .modal-image-side { width: 100%; min-height: 200px; }
+            .modal-photo, .modal-photo-fallback { width: 180px; height: 220px; border-radius: 14px; }
+            .modal-photo-fallback span { font-size: 48px; }
+            .modal-details-side { padding: 24px 20px 20px; }
+            .modal-actions { flex-direction: column; }
+            .modal-btn { min-width: 0; }
+        }
+        @media (max-width: 480px) {
+            .team-logo-text { font-size: 17px; }
+            .team-logo-sub { font-size: 11px; }
+            .team-hero-title { font-size: 21px; }
+            .card-name, .card-name-ar { font-size: 16px; }
+        }
+
+        /* ── Print ── */
+        @media print {
+            .team-header, .search-section, .btn-back, .team-footer, .modal-overlay { display: none !important; }
+            body { background: #fff; }
+            .guide-card { break-inside: avoid; box-shadow: none; border: 1px solid #ececec; cursor: default; }
+            .guide-card:hover { transform: none; box-shadow: none; }
+            .team-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Page Header -->
+    <header class="team-header">
+        <div class="team-header-inner">
+            <a class="team-logo" href="./index.html">
+                <span class="team-logo-icon" id="globalHeaderLogo">🧭</span>
+                <div>
+                    <div class="team-logo-text" id="globalHeaderNameAr">بوصلة نت</div>
+                    <span id="globalHeaderNameHe" style="font-size:17px;font-weight:700;color:#fff;display:none;">מצפן נט</span>
+                    <div class="team-logo-sub">فريق المرشدين</div>
+                </div>
+            </a>
+            <a href="./index.html" class="btn-back">→ الرئيسية</a>
+        </div>
+    </header>
+
+    <!-- Hero Title -->
+    <section class="team-hero" aria-label="כותרת דף הצוות">
+        <h1 class="team-hero-title">فريق المرشدين</h1>
+        <p class="team-hero-sub">تعرفوا على الأشخاص الذين يرافقونكم على طول الطريق</p>
+    </section>
+
+    <!-- Dedicated Search Section -->
+    <section class="search-section" aria-label="חיפוש מדריכים">
+        <div class="search-wrapper">
+            <input type="text" id="teamSearch" placeholder="بحث بالاسم، المنصب، التخصص، الهاتف أو البريد الإلكتروني..." oninput="filterTeam()" aria-label="بحث مرشدين">
+            <span class="search-icon">🔍</span>
+            <button class="search-clear" id="searchClear" onclick="clearSearch()" aria-label="مسح البحث">✕</button>
+        </div>
+        <div class="search-results-count" id="searchResultsCount"></div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="team-content">
+        <div class="team-grid" id="teamGrid"></div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="team-footer" id="globalFooterText">
+        بوصلة نت © <span id="footerYear"></span> | وزارة التربية والتعليم | نظام متابعة حلول التعلم
+    </footer>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="guideModal" onclick="if(event.target===this)closeGuideModal()" role="presentation" aria-hidden="true">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalName" aria-hidden="true">
+            <button class="modal-close" type="button" onclick="closeGuideModal()" aria-label="إغلاق">✕</button>
+            <div class="modal-content">
+                <!-- Right side — Image -->
+                <div class="modal-image-side" id="modalImageSide">
+                    <img class="modal-photo" id="modalPhoto" alt="" style="display:none;">
+                    <div class="modal-photo-fallback" id="modalPhotoFallback" style="display:none;"><span id="modalInitials"></span></div>
+                </div>
+                <!-- Left side — Details -->
+                <div class="modal-details-side">
+                    <h2 class="modal-name" id="modalName"></h2>
+                    <p class="modal-name-ar" id="modalNameAr" style="display:none;"></p>
+                    <div class="modal-position-badge" id="modalPosition" style="display:none;"></div>
+
+                    <div class="modal-detail-rows">
+                        <div class="modal-detail-row" id="modalPhoneRow" style="display:none;">
+                            <span class="modal-detail-icon">📞</span>
+                            <div class="modal-detail-content">
+                                <span class="modal-detail-label">هاتف</span>
+                                <span class="modal-detail-value" id="modalPhone"></span>
+                            </div>
+                        </div>
+                        <div class="modal-detail-row" id="modalEmailRow" style="display:none;">
+                            <span class="modal-detail-icon">📧</span>
+                            <div class="modal-detail-content">
+                                <span class="modal-detail-label">بريد إلكتروني</span>
+                                <span class="modal-detail-value" id="modalEmail"></span>
+                            </div>
+                        </div>
+                        <div class="modal-detail-row" id="modalSpecsRow" style="display:none;">
+                            <span class="modal-detail-icon">🎯</span>
+                            <div class="modal-detail-content">
+                                <span class="modal-detail-label">تخصصات</span>
+                                <span class="modal-detail-value" id="modalSpecs"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-actions" id="modalActions"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./js/data.js?v=4.4.0"></script>
+    <script src="./js/global-ui.js?v=1.0.0"></script>
+    <script>
+        // Footer year
+        document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+        // Cache of currently-rendered guides (used by modal lookup)
+        var currentGuides = [];
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            var d = document.createElement('div');
+            d.textContent = str;
+            return d.innerHTML;
+        }
+
+        // Normalize phone for WhatsApp: strip non-digits, add Israel prefix if mobile
+        function toWhatsAppUrl(phone) {
+            if (!phone) return '';
+            var digits = phone.replace(/[^\d+]/g, '');
+            // If starts with 0, replace with 972 (Israel country code)
+            if (digits.indexOf('0') === 0) {
+                digits = '972' + digits.substring(1);
+            }
+            return 'https://wa.me/' + digits;
+        }
+
+        // Vibrant teal-palette gradients for card headers (variety, on-brand)
+        var cardGradients = [
+            'linear-gradient(135deg, #0ca7aa 0%, #09787a 100%)',
+            'linear-gradient(135deg, #0e8a8d 0%, #0a5c5e 100%)',
+            'linear-gradient(135deg, #00b8b8 0%, #09787a 100%)',
+            'linear-gradient(135deg, #0ca7aa 0%, #0e5a5d 100%)',
+            'linear-gradient(135deg, #0e5a5d 0%, #0f1820 100%)',
+            'linear-gradient(135deg, #09787a 0%, #0ca7aa 100%)'
+        ];
+
+        function getInitials(name) {
+            if (!name) return '?';
+            var parts = name.trim().split(/\s+/).filter(function(p) { return p.length > 0; });
+            if (parts.length === 0) return '?';
+            if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+            return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+        }
+
+        function renderTeam(filter) {
+            var items = (DataStore.getAll(DataStore.KEYS.GUIDES_REPO) || []).slice().sort(function(a,b) { return (a.order||0) - (b.order||0); });
+            var totalCount = items.length;
+
+            // Filter
+            if (filter) {
+                var f = filter.toLowerCase();
+                items = items.filter(function(g) {
+                    return (g.fullName || '').toLowerCase().indexOf(f) !== -1 ||
+                           (g.fullNameAr || '').toLowerCase().indexOf(f) !== -1 ||
+                           (g.idNumber || '').indexOf(f) !== -1 ||
+                           (g.position || '').toLowerCase().indexOf(f) !== -1 ||
+                           (g.specializations || '').toLowerCase().indexOf(f) !== -1 ||
+                           (g.email || '').toLowerCase().indexOf(f) !== -1 ||
+                           (g.phone || '').indexOf(f) !== -1;
+                });
+            }
+
+            // Show results count when filtering
+            var countEl = document.getElementById('searchResultsCount');
+            var clearBtn = document.getElementById('searchClear');
+            if (filter) {
+                countEl.textContent = 'تم العثور على ' + items.length + ' مرشدين من أصل ' + totalCount;
+                clearBtn.classList.add('visible');
+            } else {
+                countEl.textContent = '';
+                clearBtn.classList.remove('visible');
+            }
+
+            // Render cards
+            if (!items.length) {
+                currentGuides = [];
+                document.getElementById('teamGrid').innerHTML = '<div class="team-empty"><div class="team-empty-icon">👥</div><div class="team-empty-text">' + (filter ? 'لم يتم العثور على نتائج' : 'لا يوجد مرشدون في قاعدة البيانات') + '</div><div class="team-empty-sub">' + (filter ? 'حاول البحث عن مصطلح آخر' : 'يمكن إضافة مرشدين من خلال لوحة التحكم') + '</div></div>';
+                return;
+            }
+
+            // Cache for modal lookup
+            currentGuides = items;
+
+            var html = items.map(function(g, idx) {
+                var gradient = cardGradients[idx % cardGradients.length];
+
+                // Avatar (photo or initials fallback)
+                var avatarHtml;
+                if (g.profileImage) {
+                    avatarHtml = '<img class="card-avatar" src="' + g.profileImage + '" alt="' + escapeHtml(g.fullName || '') + '" loading="lazy">';
+                } else {
+                    avatarHtml = '<div class="card-avatar-fallback"><span>' + escapeHtml(getInitials(g.fullName)) + '</span></div>';
+                }
+
+                var nameHtml = escapeHtml(g.fullName || 'بدون اسم');
+                var nameArHtml = g.fullNameAr ? '<p class="card-name-ar">' + escapeHtml(g.fullNameAr) + '</p>' : '';
+                var positionHtml = g.position ? escapeHtml(g.position) : '';
+
+                return '<article class="guide-card" tabindex="0" role="button" aria-label="' + escapeHtml(g.fullName || '') + (g.position ? ' - ' + escapeHtml(g.position) : '') + '" onclick="openGuideModal(' + idx + ')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();openGuideModal(' + idx + ');}">' +
+                    '<div class="card-header" style="background:' + gradient + ';">' +
+                        avatarHtml +
+                    '</div>' +
+                    '<div class="card-body">' +
+                        '<h3 class="card-name">' + nameHtml + '</h3>' +
+                        nameArHtml +
+                        '<p class="card-position">' + positionHtml + '</p>' +
+                        '<button class="card-details-btn" type="button" onclick="event.stopPropagation();openGuideModal(' + idx + ')">' +
+                            'المزيد من التفاصيل <span class="btn-arrow">←</span>' +
+                        '</button>' +
+                    '</div>' +
+                '</article>';
+            }).join('');
+
+            document.getElementById('teamGrid').innerHTML = html;
+        }
+
+        function openGuideModal(idx) {
+            var g = currentGuides[idx];
+            if (!g) return;
+
+            var gradient = cardGradients[idx % cardGradients.length];
+
+            // Image side gradient
+            document.getElementById('modalImageSide').style.background = gradient;
+
+            // Photo
+            var photoEl = document.getElementById('modalPhoto');
+            var fallbackEl = document.getElementById('modalPhotoFallback');
+            if (g.profileImage) {
+                photoEl.src = g.profileImage;
+                photoEl.alt = g.fullName || '';
+                photoEl.style.display = 'block';
+                fallbackEl.style.display = 'none';
+            } else {
+                document.getElementById('modalInitials').textContent = getInitials(g.fullName);
+                photoEl.style.display = 'none';
+                fallbackEl.style.display = 'flex';
+            }
+
+            // Name (Hebrew) + Arabic
+            document.getElementById('modalName').textContent = g.fullName || 'بدون اسم';
+            var nameArEl = document.getElementById('modalNameAr');
+            if (g.fullNameAr) {
+                nameArEl.textContent = g.fullNameAr;
+                nameArEl.style.display = 'block';
+            } else {
+                nameArEl.style.display = 'none';
+            }
+
+            // Position
+            var positionEl = document.getElementById('modalPosition');
+            if (g.position) {
+                positionEl.textContent = g.position;
+                positionEl.style.display = 'inline-block';
+            } else {
+                positionEl.style.display = 'none';
+            }
+
+            // Detail rows
+            var phoneRow = document.getElementById('modalPhoneRow');
+            var emailRow = document.getElementById('modalEmailRow');
+            var specsRow = document.getElementById('modalSpecsRow');
+
+            if (g.phone) {
+                document.getElementById('modalPhone').textContent = g.phone;
+                phoneRow.style.display = 'flex';
+            } else {
+                phoneRow.style.display = 'none';
+            }
+
+            if (g.email) {
+                document.getElementById('modalEmail').textContent = g.email;
+                emailRow.style.display = 'flex';
+            } else {
+                emailRow.style.display = 'none';
+            }
+
+            if (g.specializations) {
+                document.getElementById('modalSpecs').textContent = g.specializations;
+                specsRow.style.display = 'flex';
+            } else {
+                specsRow.style.display = 'none';
+            }
+
+            // Actions: WhatsApp
+            var actionsHtml = '';
+            if (g.phone) {
+                actionsHtml += '<a class="modal-btn modal-btn--whatsapp modal-btn--full" href="' + toWhatsAppUrl(g.phone) + '" target="_blank" rel="noopener">' +
+                    '<span class="btn-icon">💬</span>' +
+                    '<span class="btn-value">ترغب في التواصل؟ اضغط هنا لإرسال رسالة واتساب</span>' +
+                '</a>';
+            }
+            document.getElementById('modalActions').innerHTML = actionsHtml;
+
+            // Show modal
+            var overlay = document.getElementById('guideModal');
+            overlay.classList.add('is-open');
+            overlay.setAttribute('aria-hidden', 'false');
+            overlay.querySelector('.modal-card').setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeGuideModal() {
+            var overlay = document.getElementById('guideModal');
+            overlay.classList.remove('is-open');
+            overlay.setAttribute('aria-hidden', 'true');
+            overlay.querySelector('.modal-card').setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+
+        // Close modal on ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeGuideModal();
+        });
+
+        function filterTeam() {
+            renderTeam(document.getElementById('teamSearch').value.trim());
+        }
+
+        function clearSearch() {
+            var input = document.getElementById('teamSearch');
+            input.value = '';
+            input.focus();
+            renderTeam();
+        }
+
+        // Initialize
+        if (DataStore.init && typeof DataStore.init === 'function') {
+            var _t = setTimeout(function() { renderTeam(); if (typeof GlobalUI !== 'undefined') GlobalUI.apply('ar'); }, 5000);
+            DataStore.init(false).then(function() { clearTimeout(_t); renderTeam(); if (typeof GlobalUI !== 'undefined') GlobalUI.apply('ar'); }).catch(function() { clearTimeout(_t); renderTeam(); if (typeof GlobalUI !== 'undefined') GlobalUI.apply('ar'); });
+        } else {
+            renderTeam();
+            if (typeof GlobalUI !== 'undefined') GlobalUI.apply('ar');
+        }
+    </script>
+</body>
+</html>

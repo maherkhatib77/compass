@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>בדיקת זרימת נתונים מלאה</title>
+    <style>
+        body { font-family: Arial; padding: 20px; direction: rtl; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f5f5f5; padding: 10px; overflow: auto; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>בדיקת חיבור למסד הנתונים ושמירת מידע</h1>
+    
+    <div class="test-section">
+        <h2>שלב 1: התחברות</h2>
+        <button onclick="login()">התחבר כ-admin</button>
+        <pre id="login-result"></pre>
+    </div>
+    
+    <div class="test-section">
+        <h2>שלב 2: קבלת רשימת משתמשים</h2>
+        <button onclick="getUsers()">קבל משתמשים</button>
+        <pre id="users-result"></pre>
+    </div>
+    
+    <div class="test-section">
+        <h2>שלב 3: יצירת פתרון למידה חדש</h2>
+        <button onclick="createSolution()">צור פתרון למידה</button>
+        <pre id="solution-result"></pre>
+    </div>
+    
+    <div class="test-section">
+        <h2>שלב 4: קבלת רשימת פתרונות</h2>
+        <button onclick="getSolutions()">קבל פתרונות</button>
+        <pre id="solutions-list-result"></pre>
+    </div>
+    
+    <div class="test-section">
+        <h2>שלב 5: עדכון משתמש</h2>
+        <button onclick="updateUser()">עדכן משתמש</button>
+        <pre id="update-result"></pre>
+    </div>
+
+    <script>
+        let token = null;
+        
+        async function login() {
+            try {
+                const formData = new FormData();
+                formData.append('username', 'admin');
+                formData.append('password', 'admin123');
+                
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                document.getElementById('login-result').textContent = JSON.stringify(data, null, 2);
+                
+                if (data.token) {
+                    token = data.token;
+                    document.getElementById('login-result').className = 'success';
+                } else {
+                    document.getElementById('login-result').className = 'error';
+                }
+            } catch (err) {
+                document.getElementById('login-result').textContent = 'שגיאה: ' + err.message;
+                document.getElementById('login-result').className = 'error';
+            }
+        }
+        
+        async function getUsers() {
+            if (!token) { alert('יש להתחבר תחילה!'); return; }
+            
+            try {
+                const response = await fetch('/api/data/users', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                
+                const data = await response.json();
+                document.getElementById('users-result').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('users-result').className = 'success';
+            } catch (err) {
+                document.getElementById('users-result').textContent = 'שגיאה: ' + err.message;
+                document.getElementById('users-result').className = 'error';
+            }
+        }
+        
+        async function createSolution() {
+            if (!token) { alert('יש להתחבר תחילה!'); return; }
+            
+            try {
+                const response = await fetch('/api/data-save', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token 
+                    },
+                    body: JSON.stringify({
+                        table: 'learning_solutions',
+                        action: 'insert',
+                        data: {
+                            title_he: 'פתרון בדיקה ' + Date.now(),
+                            description_he: 'תיאור פתרון בדיקה',
+                            category: 'בדיקות',
+                            status: 'draft',
+                            created_by: 1
+                        }
+                    })
+                });
+                
+                const data = await response.json();
+                document.getElementById('solution-result').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('solution-result').className = data.success ? 'success' : 'error';
+            } catch (err) {
+                document.getElementById('solution-result').textContent = 'שגיאה: ' + err.message;
+                document.getElementById('solution-result').className = 'error';
+            }
+        }
+        
+        async function getSolutions() {
+            try {
+                const response = await fetch('/api/data/solutions');
+                const data = await response.json();
+                document.getElementById('solutions-list-result').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('solutions-list-result').className = 'success';
+            } catch (err) {
+                document.getElementById('solutions-list-result').textContent = 'שגיאה: ' + err.message;
+                document.getElementById('solutions-list-result').className = 'error';
+            }
+        }
+        
+        async function updateUser() {
+            if (!token) { alert('יש להתחבר תחילה!'); return; }
+            
+            try {
+                const response = await fetch('/api/data-save', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token 
+                    },
+                    body: JSON.stringify({
+                        table: 'users',
+                        action: 'update',
+                        data: {
+                            id: 1,
+                            full_name: 'מנהל מערכת מעודכן',
+                            email: 'updated@matspanet.gov.il'
+                        }
+                    })
+                });
+                
+                const data = await response.json();
+                document.getElementById('update-result').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('update-result').className = data.success ? 'success' : 'error';
+            } catch (err) {
+                document.getElementById('update-result').textContent = 'שגיאה: ' + err.message;
+                document.getElementById('update-result').className = 'error';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+# FastAPI - Framework מודרני לבניית API
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+
+# מסד נתונים
+mysql-connector-python==8.3.0
+
+# ניהול הגדרות סביבה
+python-dotenv==1.0.0
+
+# Production WSGI Server
+gunicorn==21.2.0
+
+# כלים נוספים (אופציונלי)
+# python-multipart==0.0.6  # לטיפול בטפסים
+# httpx==0.26.0  # לבדיקות API

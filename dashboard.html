@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מצפן נט - לוח בקרה</title>
+    <link rel="stylesheet" href="./css/style.css">
+        <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tinymce@6.8.5/tinymce.min.js" referrerpolicy="origin"></script>
+        
+        <style>
+        /* ===== מתג שפה — הוסר מה-Back End (עברית בלבד) ===== */
+        </style>
+        
+</head>
+<body>
+    <!-- מסך טעינה -->
+    <div class="loading-overlay" id="loadingOverlay" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;">
+        <div class="spinner" style="width:48px;height:48px;border:4px solid #e2e8f0;border-top-color:#0ca7aa;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+        <div class="loading-text" style="margin-top:16px;color:#475569;font-size:14px;">⏳ טוען מערכת...</div>
+    </div>
+    <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+
+    <!-- מבנה האפליקציה (יוסתר עד לסיום הטעינה) -->
+    <div class="app-layout" id="appLayout" style="display:none;">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">🧭</div>
+                <div>
+                    <div class="sidebar-title">מצפן נט</div>
+                    <div class="sidebar-subtitle">מעקב פתרונות למידה</div>
+                </div>
+            </div>
+            <nav class="sidebar-nav" id="sidebarNav"></nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-user" id="sidebarUserInfo" onclick="App.showSection('settings')"></div>
+                <button class="btn btn-ghost btn-block" style="margin-top:8px;color:#fca5a5;" onclick="Auth.logout()">🚪 התנתקות</button>
+            </div>
+        </aside>
+
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <main class="main-content">
+            <header class="app-header">
+                <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+                <h1 class="header-title" id="headerTitle">📊 לוח בקרה</h1>
+                <div id="activePeriodBadge" style="margin-right:auto;margin-left:8px;"></div>
+                <div class="header-actions">
+                    <button class="btn btn-outline btn-sm" onclick="window.print()">🖨️ הדפסה</button>
+                </div>
+            </header>
+
+            <div class="page-content" id="pageContent">
+                <div id="section-dashboard" class="section-page active"></div>
+                <div id="section-solutions" class="section-page"></div>
+                <div id="section-instructors" class="section-page"></div>
+                <div id="section-guides" class="section-page"></div>
+                <div id="section-guides-repo" class="section-page"></div>
+                <div id="section-budgets" class="section-page"></div>
+                <div id="section-periods" class="section-page"></div>
+                <div id="section-lookup-tables" class="section-page"></div>
+                <div id="section-registrations" class="section-page"></div>
+                <div id="section-permissions" class="section-page"></div>
+                <div id="section-activity-log" class="section-page"></div>
+                <div id="section-recycle-bin" class="section-page"></div>
+                <div id="section-homepage" class="section-page"></div>
+                <div id="section-faq" class="section-page"></div>
+                <div id="section-settings" class="section-page"></div>
+                <div id="section-new-solution" class="section-page"></div>
+                <div id="section-custom-pages" class="section-page"></div>
+                <div id="section-import-export" class="section-page"></div>
+            </div>
+
+            <footer style="text-align:center;padding:16px;color:var(--gray-400);font-size:12px;border-top:1px solid var(--gray-200);background:white;">
+                <span id="globalFooterText">© מצפן נט — משרד החינוך</span>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">כותרת</h3>
+                <button class="modal-close" onclick="App.closeModal()">✕</button>
+                </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer" id="modalFooter"></div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- טעינת ספריות ואתחול המערכת (החלק הקריטי!) -->
+    <!-- ========================================== -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script src="./js/data.js"></script>
+    <script src="./js/auth.js"></script>
+    <script src="./js/global-ui.js"></script>
+    <script src="./js/budget-import.js"></script>
+    <script src="./js/app.js"></script>
+
+    <script>
+        console.log('[Dashboard] 📦 בדיקת טעינת קבצים...');
+        console.log('[Dashboard] DataStore קיים:', typeof DataStore !== 'undefined');
+        console.log('[Dashboard] App קיים:', typeof App !== 'undefined');
+
+        function _startApp() {
+            try {
+                if (typeof App === 'undefined') {
+                    console.error('[Dashboard] ❌ שגיאה קריטית: App לא הוגדר! ייתכן שגיאת תחביר ב-app.js או בעיית מטמון.');
+                    document.getElementById('loadingOverlay').innerHTML = '<div style="text-align:center;color:#dc2626;"><h2>⚠️ שגיאת טעינה</h2><p>קובץ app.js לא נטען כראוי. נסה ללחוץ <strong>Ctrl + F5</strong>.</p></div>';
+                    return;
+                }
+                
+                console.log('[Dashboard] ✅ App נמצא, מאתחל את המערכת...');
+                App.init();
+                
+                // הסתרת מסך הטעינה והצגת האפליקציה
+                setTimeout(() => {
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    document.getElementById('appLayout').style.display = 'flex';
+                }, 500);
+            } catch (err) {
+                console.error('[Dashboard] ❌ שגיאה בעת אתחול App:', err);
+            }
+        }
+
+        if (typeof DataStore !== 'undefined') {
+            console.log('[Dashboard] 🔄 מאתחל DataStore...');
+            DataStore.init(false).then(() => {
+                console.log('[Dashboard] ✅ DataStore מוכן.');
+                _startApp();
+            }).catch(err => {
+                console.error('[Dashboard] ❌ שגיאה ב-DataStore:', err);
+                _startApp(); // מנסה להמשיך בכל מקרה
+            });
+        } else {
+            console.error('[Dashboard] ❌ DataStore לא הוגדר! בדוק את js/data.js');
+        }
+    </script>
+</body>
+</html>

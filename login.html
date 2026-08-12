@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מצפן נט — כניסה למערכת</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   מצפן נט — מסך כניסה (עיצוב עצמאי, ללא תלות ב-style.css)
+   ============================================================ */
+:root{
+  --primary:#0ca7aa; --primary-dark:#09787a; --primary-light:#0e5a5d;
+  --primary-bg:#e9f6fb; --accent:#00b8b8;
+  --navy:#0f1820; --navy-2:#24343f; --navy-deep:#043233;
+  --gray-50:#f5f7f8; --gray-100:#eef1f2; --gray-200:#e1e6e8;
+  --gray-300:#c4ccd0; --gray-400:#94a0a6; --gray-500:#66737a;
+  --gray-600:#475560; --gray-700:#2b3740; --gray-800:#16212a;
+  --danger:#d9534f; --danger-bg:#fdecea;
+  --radius:14px; --radius-sm:10px;
+  --shadow-card:0 30px 70px -28px rgba(8,40,42,.55), 0 12px 28px -18px rgba(8,40,42,.35);
+  --font:'Noto Sans Hebrew','Tajawal','Noto Sans Arabic',system-ui,sans-serif;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:15px;-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--font); direction:rtl; text-align:right;
+  color:var(--gray-700); background:var(--gray-50);
+  min-height:100vh; -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+button{font-family:inherit}
+::selection{background:var(--primary-bg);color:var(--primary-dark)}
+
+/* ---------- SHELL (מסך מפוצל) ---------- */
+.auth-shell{display:flex;min-height:100vh}
+
+/* ---------- BRAND PANEL (הצד החי) ---------- */
+.auth-brand{
+  position:relative; flex:1 1 50%; overflow:hidden;
+  display:flex; flex-direction:column; justify-content:space-between;
+  padding:clamp(28px,4vw,56px);
+  background:
+    radial-gradient(120% 90% at 80% 0%, rgba(0,184,184,.28) 0%, transparent 55%),
+    linear-gradient(155deg, var(--navy-deep) 0%, var(--primary-dark) 48%, var(--navy) 100%);
+  color:#eaf6f6; isolation:isolate;
+}
+/* רשת עדינה */
+.auth-brand::before{
+  content:""; position:absolute; inset:0; z-index:-1; opacity:.5;
+  background-image:
+    linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+  background-size:46px 46px;
+  -webkit-mask-image:radial-gradient(120% 120% at 30% 20%, #000 30%, transparent 80%);
+          mask-image:radial-gradient(120% 120% at 30% 20%, #000 30%, transparent 80%);
+}
+/* אורות צפים */
+.orb{position:absolute; border-radius:50%; filter:blur(46px); z-index:-1; opacity:.55; will-change:transform}
+.orb.a{width:340px;height:340px; top:-90px; left:-70px; background:radial-gradient(circle,#19d3d3,transparent 70%); animation:drift1 16s ease-in-out infinite}
+.orb.b{width:300px;height:300px; bottom:-110px; right:-60px; background:radial-gradient(circle,#0a6f72,transparent 70%); animation:drift2 19s ease-in-out infinite}
+@keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,30px) scale(1.12)}}
+@keyframes drift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-34px,-26px) scale(1.1)}}
+
+.brand-top{display:flex;align-items:center;gap:14px;animation:fadeUp .7s both}
+.logo-mark{
+  position:relative; width:58px; height:58px; flex:none; border-radius:18px;
+  display:grid; place-items:center; font-size:28px;
+  background:linear-gradient(135deg,var(--primary),var(--primary-light));
+  box-shadow:0 10px 26px -8px rgba(0,184,184,.6);
+}
+.logo-mark::after{
+  content:""; position:absolute; inset:-7px; border-radius:22px;
+  border:1.5px dashed rgba(255,255,255,.35); animation:ringSpin 22s linear infinite;
+}
+@keyframes ringSpin{to{transform:rotate(360deg)}}
+.brand-name{font-size:1.5rem; font-weight:800; letter-spacing:-.3px; line-height:1.1}
+.brand-name small{display:block; font-size:.78rem; font-weight:500; color:rgba(234,246,246,.6); margin-top:3px}
+
+.brand-hero{margin:auto 0; max-width:440px}
+.eyebrow{
+  display:inline-flex; align-items:center; gap:8px; font-size:.74rem; font-weight:700;
+  letter-spacing:.5px; text-transform:uppercase; color:#9fe9e9;
+  padding:6px 12px; border:1px solid rgba(159,233,233,.3); border-radius:999px;
+  background:rgba(255,255,255,.05); margin-bottom:20px; animation:fadeUp .7s .05s both;
+}
+.brand-hero h1{
+  font-size:clamp(2rem,4.4vw,3.1rem); font-weight:900; line-height:1.08;
+  letter-spacing:-1px; margin-bottom:16px; animation:fadeUp .7s .12s both;
+}
+.brand-hero h1 em{font-style:normal; color:#7fe3e3}
+.brand-hero p{font-size:1.02rem; line-height:1.75; color:rgba(234,246,246,.78); max-width:40ch; animation:fadeUp .7s .2s both}
+
+.value-list{list-style:none; margin-top:30px; display:flex; flex-direction:column; gap:2px}
+.value-list li{
+  display:flex; align-items:center; gap:14px; padding:11px 0;
+  border-top:1px solid rgba(255,255,255,.08); animation:fadeUp .6s both;
+}
+.value-list li:nth-child(1){animation-delay:.30s}
+.value-list li:nth-child(2){animation-delay:.40s}
+.value-list li:nth-child(3){animation-delay:.50s}
+.value-ico{
+  width:38px; height:38px; flex:none; border-radius:11px; display:grid; place-items:center;
+  font-size:18px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12);
+}
+.value-list span{font-size:.95rem; font-weight:500; color:rgba(234,246,246,.92)}
+
+.brand-foot{display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; animation:fadeUp .7s .6s both}
+.live-pill{display:inline-flex; align-items:center; gap:8px; font-size:.8rem; color:rgba(234,246,246,.7)}
+.live-dot{width:9px; height:9px; border-radius:50%; background:#37d67a; box-shadow:0 0 0 0 rgba(55,214,122,.6); animation:blink 2s infinite}
+@keyframes blink{0%{box-shadow:0 0 0 0 rgba(55,214,122,.55)}70%{box-shadow:0 0 0 8px rgba(55,214,122,0)}100%{box-shadow:0 0 0 0 rgba(55,214,122,0)}}
+.brand-foot .org{font-size:.78rem; color:rgba(234,246,246,.5)}
+
+/* ---------- FORM PANEL ---------- */
+.auth-form-wrap{
+  flex:1 1 50%; display:flex; align-items:center; justify-content:center;
+  padding:clamp(24px,4vw,56px); background:
+    radial-gradient(80% 60% at 100% 0%, var(--primary-bg) 0%, transparent 60%), var(--gray-50);
+}
+.auth-card{width:100%; max-width:420px; animation:fadeUp .6s .1s both}
+.card-head{margin-bottom:30px}
+.card-head .hi{font-size:1.7rem; font-weight:800; color:var(--gray-800); letter-spacing:-.4px}
+.card-head .sub{margin-top:6px; font-size:.95rem; color:var(--gray-500)}
+
+.field{margin-bottom:18px}
+.field label{display:block; font-size:.82rem; font-weight:700; color:var(--gray-600); margin-bottom:8px}
+.input-wrap{position:relative; display:flex; align-items:center}
+.input-wrap .lead{
+  position:absolute; right:14px; font-size:17px; color:var(--gray-400);
+  pointer-events:none; transition:color .2s;
+}
+.input-wrap input{
+  width:100%; padding:13px 44px 13px 14px; font-size:.98rem; font-family:inherit;
+  color:var(--gray-800); background:#fff; direction:rtl;
+  border:1.8px solid var(--gray-200); border-radius:var(--radius-sm);
+  transition:border-color .2s, box-shadow .2s;
+}
+.input-wrap input::placeholder{color:var(--gray-400)}
+.input-wrap input:hover{border-color:var(--gray-300)}
+.input-wrap input:focus{outline:none; border-color:var(--primary); box-shadow:0 0 0 4px rgba(12,167,170,.13)}
+.input-wrap:focus-within .lead{color:var(--primary)}
+.input-wrap input.has-toggle{padding-left:46px}
+.eye-btn{
+  position:absolute; left:8px; width:34px; height:34px; border:none; background:transparent;
+  border-radius:8px; cursor:pointer; font-size:16px; color:var(--gray-400);
+  display:grid; place-items:center; transition:background .15s,color .15s;
+}
+.eye-btn:hover{background:var(--gray-100); color:var(--gray-600)}
+
+/* הדגשה בעת מילוי אוטומטי */
+.input-wrap.flash input{animation:fieldFlash .8s ease}
+@keyframes fieldFlash{0%{box-shadow:0 0 0 0 rgba(12,167,170,.5)}40%{box-shadow:0 0 0 6px rgba(12,167,170,.18);border-color:var(--primary)}100%{box-shadow:0 0 0 0 rgba(12,167,170,0)}}
+
+.row-between{display:flex; align-items:center; justify-content:space-between; margin:4px 0 22px; gap:10px}
+.check{display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-size:.85rem; color:var(--gray-600); user-select:none}
+.check input{width:17px; height:17px; accent-color:var(--primary); cursor:pointer}
+.link-muted{background:none; border:none; padding:0; cursor:pointer; font-size:.85rem; color:var(--primary); font-weight:600}
+.link-muted:hover{color:var(--primary-dark); text-decoration:underline}
+
+.submit-btn{
+  width:100%; padding:14px; border:none; border-radius:var(--radius-sm); cursor:pointer;
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:#fff;
+  font-size:1rem; font-weight:700; letter-spacing:.2px;
+  display:inline-flex; align-items:center; justify-content:center; gap:10px;
+  box-shadow:0 12px 24px -10px rgba(12,167,170,.7);
+  transition:transform .15s, box-shadow .2s, opacity .2s;
+}
+.submit-btn:hover:not(:disabled){transform:translateY(-2px); box-shadow:0 18px 30px -12px rgba(12,167,170,.75)}
+.submit-btn:active:not(:disabled){transform:translateY(0) scale(.99)}
+.submit-btn:disabled{opacity:.7; cursor:wait}
+.spinner{width:18px; height:18px; border:2.5px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.error-box{
+  display:none; align-items:center; gap:9px; margin-bottom:16px;
+  padding:11px 14px; border-radius:var(--radius-sm);
+  background:var(--danger-bg); border:1px solid #f3c6c3; color:#b3342f; font-size:.88rem; font-weight:600;
+}
+.error-box.show{display:flex; animation:shake .42s}
+@keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-7px)}40%,60%{transform:translateX(7px)}}
+
+.card-foot{margin-top:26px; text-align:center; font-size:.78rem; color:var(--gray-400); line-height:1.6}
+
+/* ---------- DEV PANEL (מקומי בלבד) ---------- */
+.dev-panel{
+  margin-top:22px; padding:14px 16px; border-radius:var(--radius-sm);
+  border:1.5px dashed var(--gray-300); background:repeating-linear-gradient(45deg,#fbfdfd,#fbfdfd 10px,#f4f8f8 10px,#f4f8f8 20px);
+}
+.dev-panel .dev-title{display:flex; align-items:center; gap:8px; font-size:.82rem; font-weight:800; color:var(--gray-600); margin-bottom:4px}
+.dev-panel .dev-note{font-size:.74rem; color:var(--gray-500); margin-bottom:12px; line-height:1.5}
+.dev-rows{display:flex; flex-direction:column; gap:8px}
+.dev-row{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:9px 12px; background:#fff; border:1px solid var(--gray-200); border-radius:9px;
+}
+.dev-row .who{font-size:.82rem}
+.dev-row .who b{color:var(--gray-700)}
+.dev-row .who code{direction:ltr; display:inline-block; color:var(--gray-500); font-size:.76rem; background:var(--gray-100); padding:1px 7px; border-radius:5px; margin-right:6px}
+.dev-fill{
+  border:1px solid var(--primary); background:var(--primary-bg); color:var(--primary-dark);
+  font-size:.76rem; font-weight:700; padding:6px 12px; border-radius:8px; cursor:pointer; white-space:nowrap;
+  transition:background .15s,transform .1s;
+}
+.dev-fill:hover{background:#d7f0f1}
+.dev-fill:active{transform:scale(.96)}
+.dev-missing{font-size:.8rem; color:var(--gray-500); line-height:1.6}
+.dev-missing code{direction:ltr; background:var(--gray-100); padding:1px 6px; border-radius:5px; font-size:.76rem}
+
+/* ---------- TOAST ---------- */
+.toast{
+  position:fixed; top:20px; left:50%; transform:translateX(-50%) translateY(-20px);
+  background:var(--gray-800); color:#fff; padding:11px 20px; border-radius:999px;
+  font-size:.86rem; font-weight:600; box-shadow:0 12px 30px -10px rgba(0,0,0,.4);
+  opacity:0; pointer-events:none; transition:opacity .25s,transform .25s; z-index:50;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width:880px){
+  .auth-shell{flex-direction:column}
+  .auth-brand{flex:none; padding:26px 24px; min-height:auto}
+  .auth-brand .value-list, .auth-brand .brand-hero p, .auth-brand .brand-foot .org{display:none}
+  .brand-hero{margin:18px 0 0}
+  .brand-hero h1{font-size:1.5rem; margin-bottom:0}
+  .eyebrow{margin-bottom:12px}
+  .auth-form-wrap{flex:none; padding:30px 22px 40px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+
+<div class="auth-shell">
+
+  <!-- ===== פאנל מותג (חי) ===== -->
+  <aside class="auth-brand">
+    <span class="orb a"></span><span class="orb b"></span>
+
+    <div class="brand-top">
+      <div class="logo-mark" id="brandLogo">🧭</div>
+      <div class="brand-name"><span id="brandName">מצפן נט</span><small>מערכת ניהול פתרונות למידה</small></div>
+    </div>
+
+    <div class="brand-hero">
+      <span class="eyebrow">פסג״ה · משרד החינוך</span>
+      <h1>הכיוון הנכון<br>ל<em>למידה מקצועית</em></h1>
+      <p>הפלטפורמה המרכזית לתכנון, מעקב ובקרה של השתלמויות ופתרונות למידה — מהתקציב ועד השעות בכיתה.</p>
+      <ul class="value-list">
+        <li><span class="value-ico">🧭</span><span>ניהול מחזור חיים מלא של פתרונות למידה</span></li>
+        <li><span class="value-ico">⏱️</span><span>מעקב תקציבים, שעות ומנחים בזמן אמת</span></li>
+        <li><span class="value-ico">📊</span><span>דיווח ובקרה דו‑לשוניים — עברית וערבית</span></li>
+      </ul>
+    </div>
+
+    <div class="brand-foot">
+      <span class="live-pill"><span class="live-dot"></span> המערכת פעילה · <span id="liveClock">--:--</span></span>
+      <span class="org">© <span id="footYear"></span> כל הזכויות שמורות</span>
+    </div>
+  </aside>
+
+  <!-- ===== פאנל טופס ===== -->
+  <main class="auth-form-wrap">
+    <div class="auth-card">
+      <div class="card-head">
+        <div class="hi">ברוכים הבאים 👋</div>
+        <div class="sub">התחברו כדי להמשיך ללוח הבקרה</div>
+      </div>
+
+      <form id="loginForm" novalidate>
+        <div class="field">
+          <label for="username">שם משתמש</label>
+          <div class="input-wrap" id="wrapUser">
+            <span class="lead">👤</span>
+            <input type="text" id="username" name="username" autocomplete="username" placeholder="הזינו שם משתמש" required>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="password">סיסמה</label>
+          <div class="input-wrap" id="wrapPass">
+            <span class="lead">🔒</span>
+            <input type="password" id="password" name="password" autocomplete="current-password" class="has-toggle" placeholder="הזינו סיסמה" required>
+            <button type="button" class="eye-btn" id="eyeBtn" aria-label="הצגת או הסתרת הסיסמה" title="הצג / הסתר">👁️</button>
+          </div>
+        </div>
+
+        <div class="row-between">
+          <label class="check"><input type="checkbox" id="remember"> זכור את שם המשתמש</label>
+          <button type="button" class="link-muted" id="forgotBtn">שכחתם סיסמה?</button>
+        </div>
+
+        <div class="error-box" id="errorBox"><span>⚠️</span><span id="errorText"></span></div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+          <span id="submitLabel">כניסה למערכת</span>
+        </button>
+      </form>
+
+      <!-- פאנל בדיקה — מופיע רק בסביבה מקומית, נבנה ע"י ה-JS -->
+      <div id="devMount"></div>
+
+      <div class="card-foot" id="cardFoot">מערכת פנימית לשימוש מורשים בלבד</div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ספריות המערכת -->
+<script src="./js/data.js"></script>
+<script src="./js/auth.js"></script>
+
+<script>
+/* ================================================================
+   לוגיקת מסך הכניסה
+   ----------------------------------------------------------------
+   אבטחה: פרטי בדיקה (סיסמאות) אינם נמצאים בקובץ זה כלל.
+   הם חיים בקובץ נפרד:  ./js/dev-creds.js
+   הקובץ הזה נטען אך ורק כאשר המערכת מזהה סביבה מקומית
+   (localhost / file:// / רשת פרטית). בשרת הייצור הקובץ לעולם
+   לא נטען — ולכן אין שום זכר לסיסמאות בדף הפומבי.
+   ================================================================ */
+(function () {
+  'use strict';
+
+  var el = function (id) { return document.getElementById(id); };
+  var _busy = false;
+
+  /* ---------- זיהוי סביבה מקומית ---------- */
+  function isLocalEnv() {
+    try {
+      var h = (window.location.hostname || '').toLowerCase();
+      var p = window.location.protocol || '';
+      if (p === 'file:') return true;
+      if (h === '' || h === 'localhost' || h === '127.0.0.1' || h === '::1') return true;
+      if (h.indexOf('127.') === 0) return true;        // loopback
+      if (h.indexOf('192.168.') === 0) return true;    // רשת ביתית
+      if (h.indexOf('10.') === 0) return true;         // רשת פרטית
+      if (h.indexOf('172.') === 0) return true;        // רשת פרטית
+      if (h.slice(-6) === '.local') return true;
+      return false;
+    } catch (e) { return false; }
+  }
+
+  /* ---------- מילוי מותג מהגדרות המערכת ---------- */
+  function applyBrand() {
+    try {
+      if (typeof DataStore === 'undefined' || !DataStore.getSettings) return;
+      var s = DataStore.getSettings() || {};
+      if (s.siteNameHe && el('brandName')) el('brandName').textContent = s.siteNameHe;
+      if (s.logoUrl && el('brandLogo')) el('brandLogo').innerHTML = '<img src="' + s.logoUrl + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:18px;">';
+      if (s.copyrightHe && el('cardFoot')) el('cardFoot').textContent = s.copyrightHe;
+    } catch (e) {}
+  }
+
+  /* ---------- שעון חי ---------- */
+  function tickClock() {
+    var c = el('liveClock'); if (!c) return;
+    try {
+      c.textContent = new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+    } catch (e) {}
+  }
+
+  /* ---------- Toast ---------- */
+  var _toastT;
+  function toast(msg) {
+    var t = el('toast'); if (!t) return;
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(_toastT); _toastT = setTimeout(function () { t.classList.remove('show'); }, 2200);
+  }
+
+  /* ---------- שגיאה / עסוק ---------- */
+  function showError(msg) {
+    var box = el('errorBox'); el('errorText').textContent = msg || 'שם משתמש או סיסמה שגויים';
+    box.classList.remove('show'); void box.offsetWidth; box.classList.add('show');
+  }
+  function hideError() { el('errorBox').classList.remove('show'); }
+  function setBusy(on) {
+    _busy = on;
+    var btn = el('submitBtn'), lbl = el('submitLabel');
+    btn.disabled = on;
+    lbl.innerHTML = on ? '<span class="spinner"></span> מתחבר…' : 'כניסה למערכת';
+  }
+
+  /* ---------- הצג / הסתר סיסמה ---------- */
+  function wireEye() {
+    var btn = el('eyeBtn'), inp = el('password');
+    if (!btn || !inp) return;
+    btn.addEventListener('click', function () {
+      var show = inp.type === 'password';
+      inp.type = show ? 'text' : 'password';
+      btn.textContent = show ? '🙈' : '👁️';
+      btn.title = show ? 'הסתר' : 'הצג';
+    });
+  }
+
+  /* ---------- "זכור אותי" (שם משתמש בלבד!) ---------- */
+  function restoreRemembered() {
+    try {
+      var u = localStorage.getItem('matspanet_remember_user');
+      if (u) { el('username').value = u; el('remember').checked = true; el('password').focus(); }
+    } catch (e) {}
+  }
+
+  /* ---------- כניסה ---------- */
+  function handleLogin(e) {
+    e.preventDefault();
+    if (_busy) return false;
+    var u = el('username').value.trim();
+    var pw = el('password').value;
+    hideError();
+    if (!u || !pw) { showError('יש להזין שם משתמש וסיסמה'); return false; }
+
+    // זכור אותי — שם משתמש בלבד, לעולם לא הסיסמה
+    try {
+      if (el('remember').checked) localStorage.setItem('matspanet_remember_user', u);
+      else localStorage.removeItem('matspanet_remember_user');
+    } catch (err) {}
+
+    setBusy(true);
+
+    function done(ok, msg) {
+      setBusy(false);
+      if (ok) { window.location.href = './dashboard.html'; }
+      else { showError(msg); }
+    }
+
+    // מסלול ראשי: דרך מודול האימות
+    if (typeof Auth !== 'undefined' && typeof Auth.login === 'function') {
+      try {
+        var result = Auth.login(u, pw);
+        if (result && result.success) { done(true); }
+        else { done(false, result && result.message); }
+      } catch (err) {
+        done(false, 'שגיאת התחברות: ' + err.message);
+      }
+      return false;
+    }
+
+    // מסלול גיבוי: בדיקה ישירה מול חנות המשתמשים
+    var users = (typeof DataStore !== 'undefined') ? (DataStore.getAll(DataStore.KEYS.USERS) || []) : [];
+    var found = null;
+    for (var i = 0; i < users.length; i++) {
+      if ((users[i].username || '').trim() === u && (users[i].password || '') === pw) { found = users[i]; break; }
+    }
+    if (found) {
+      if (typeof DataStore !== 'undefined' && DataStore.setSession) DataStore.setSession(found);
+      done(true);
+    } else {
+      done(false);
+    }
+    return false;
+  }
+
+  /* ============================================================
+     פאנל בדיקה מקומי — נבנה רק אם הסביבה מקומית
+     ============================================================ */
+  function fillDevCreds(i) {
+    var list = window.__DEV_CREDS__; if (!list || !list[i]) return;
+    var u = el('username'), p = el('password');
+    u.value = list[i].user; p.value = list[i].pass;
+    ['wrapUser', 'wrapPass'].forEach(function (id) {
+      var w = el(id); if (!w) return;
+      w.classList.remove('flash'); void w.offsetWidth; w.classList.add('flash');
+    });
+    el('remember').checked = true;
+    toast('פרטי הבדיקה מולאו — לחצו "כניסה"');
+  }
+
+  function renderDevPanel() {
+    var mount = el('devMount'); if (!mount) return;
+    var list = window.__DEV_CREDS__;
+    if (!list || !list.length) { renderDevMissing('הקובץ נטען אך הוא ריק.'); return; }
+    var rows = list.map(function (c, i) {
+      return '<div class="dev-row">' +
+        '<span class="who"><b>' + esc(c.role) + '</b><code>' + esc(c.user) + ' / ' + esc(c.pass) + '</code></span>' +
+        '<button type="button" class="dev-fill" data-i="' + i + '">מילוי אוטומטי</button>' +
+        '</div>';
+    }).join('');
+    mount.innerHTML =
+      '<div class="dev-panel">' +
+        '<div class="dev-title">🔧 סביבת בדיקה מקומית</div>' +
+        '<div class="dev-note">פרטים אלו מוצגים רק במחשב שלך (localhost) ואינם מועלים לשרת הייצור.</div>' +
+        '<div class="dev-rows">' + rows + '</div>' +
+      '</div>';
+    var btns = mount.querySelectorAll('.dev-fill');
+    for (var k = 0; k < btns.length; k++) {
+      btns[k].addEventListener('click', function () { fillDevCreds(parseInt(this.getAttribute('data-i'), 10)); });
+    }
+  }
+
+  function renderDevMissing(extra) {
+    var mount = el('devMount'); if (!mount) return;
+    mount.innerHTML =
+      '<div class="dev-panel">' +
+        '<div class="dev-title">🔧 סביבת בדיקה מקומית</div>' +
+        '<div class="dev-missing">לא נמצאו פרטי בדיקה. כדי להציגם, צרו את הקובץ ' +
+        '<code>js/dev-creds.js</code> (ראו הוראות).' + (extra ? ' ' + esc(extra) : '') + '</div>' +
+      '</div>';
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  /* טוען את dev-creds.js רק בסביבה מקומית */
+  function maybeLoadDevCreds() {
+    if (!isLocalEnv()) return;            // בייצור: לא עושים דבר — אין זכר לסיסמאות
+    var s = document.createElement('script');
+    s.src = './js/dev-creds.js';
+    s.onload = function () { renderDevPanel(); };
+    s.onerror = function () { renderDevMissing(); };
+    document.head.appendChild(s);
+  }
+
+  /* ---------- אתחול ---------- */
+  function boot() {
+    el('footYear').textContent = new Date().getFullYear();
+    tickClock(); setInterval(tickClock, 15000);
+    wireEye();
+    restoreRemembered();
+    el('loginForm').addEventListener('submit', handleLogin);
+    el('forgotBtn').addEventListener('click', function () { toast('לאיפוס סיסמה יש לפנות למנהל המערכת'); });
+
+    applyBrand();
+    maybeLoadDevCreds();
+
+    // המתנה לאתחול הנתונים לפני שחרור כפתור הכניסה
+    var released = false;
+    function release() { if (released) return; released = true; setBusy(false); }
+    setBusy(true); // נועל עד שהנתונים מוכנים
+
+    if (typeof DataStore !== 'undefined' && DataStore.init) {
+      var settled = false;
+      var finishInit = function () {
+        if (settled) return; settled = true;
+        applyBrand();
+        // אם כבר מחובר — מעבר ישיר
+        try {
+          var sess = DataStore.getSession && DataStore.getSession();
+          if (sess && sess.userId) { window.location.href = './dashboard.html'; return; }
+        } catch (e) {}
+        release();
+      };
+      try {
+        // אתחול רגיל (ללא טעינה מחדש מהשרת) כדי לשמור על הנתונים ב-localStorage
+        var p = DataStore.init(false);
+        if (p && typeof p.then === 'function') p.then(finishInit, finishInit);
+        else finishInit();
+      } catch (e) { finishInit(); }
+      // רשת ביטחון: אם האתחול מתעכב, נשחרר בכל זאת
+      setTimeout(finishInit, 5000);
+    } else {
+      release();
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

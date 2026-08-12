@@ -1,0 +1,18 @@
+# Route API requests to PHP scripts
+RewriteEngine On
+
+# data-save endpoint
+RewriteRule ^data-save$ data-save.php [L]
+
+# health-check endpoint
+RewriteRule ^health-check$ health-check.php [L]
+
+# health-log endpoint
+RewriteRule ^health-log$ health-log.php [L]
+
+# create-page-file endpoint
+RewriteRule ^create-page-file$ create-page-file.php [L]
+
+# Block direct access to PHP files
+RewriteCond %{THE_REQUEST} \.php [NC]
+RewriteRule ^ - [F]
