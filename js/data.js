@@ -257,6 +257,13 @@ const DataStore = {
     }
 };
 
+// Expose DataStore on window for scripts that check window.DataStore
+try {
+    if (typeof window !== 'undefined') {
+        window.DataStore = DataStore;
+    }
+} catch (e) {}
+
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = DataStore;
 }
