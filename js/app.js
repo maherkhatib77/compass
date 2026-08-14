@@ -1325,7 +1325,7 @@ function _loadActivePeriod() {
             // מונע מקריסה של שאר המערכת
             this.activePeriod = null;
         }
-    },
+    }
 
     function _getActivePeriodRange() {
         var p = AppContext.activePeriod;
