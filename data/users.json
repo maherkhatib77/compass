@@ -2,7 +2,7 @@
   {
     "id": "usr_admin_001",
     "username": "admin",
-    "password": "admin123",
+    "password": "admin",
     "fullName": "מנהל מערכת",
     "email": "admin@matspanet.co.il",
     "role": "system_admin",
