@@ -7,6 +7,34 @@ const DataStore = {
     data: {},
     isInitialized: false,
 
+    // Compatibility keys used across the app (map logical keys to table/file names)
+    KEYS: {
+        USERS: 'users',
+        SOLUTIONS: 'solutions',
+        PERIODS: 'periods',
+        BUDGETS: 'budgets',
+        REGISTRATIONS: 'registrations',
+        GUIDES_REPO: 'guides_repo',
+        FAQ_DATA: 'faq',
+        LOOKUP_WEEK_DAYS: 'lookup_week_days',
+        LOOKUP_DOMAINS: 'lookup_domains',
+        LOOKUP_MEETING_TYPES: 'lookup_meeting_types',
+        LOOKUP_BUDGET_TYPES: 'lookup_budget_types',
+        LOOKUP_RESPONSIBILITY_TYPES: 'lookup_responsibility_types',
+        LOOKUP_EDUCATION_STAGES: 'lookup_education_stages',
+        LOOKUP_EDUCATION_TYPES: 'lookup_education_types',
+        LOOKUP_FIELD_KNOWLEDGE: 'lookup_field_knowledge',
+        LOOKUP_ROLE_HOLDERS: 'lookup_role_holders',
+        SOLUTION_INSTRUCTORS: 'solution_instructors',
+        MENTORS: 'mentors',
+        INSTITUTIONS: 'institutions',
+        CUSTOM_PAGES: 'custom_pages',
+        HOMEPAGE: 'homepage',
+        SETTINGS: 'settings',
+        ACTIVITY_LOG: 'activity_log'
+    },
+
+
     async init(useCache = false) {
         console.log('🔄 DataStore: מאתחל מול מסד נתונים (API)...');
         
@@ -165,6 +193,67 @@ const DataStore = {
     
     set(tableName, dataArray) {
         this.data[tableName] = dataArray;
+    },
+
+    // Compatibility helpers expected by legacy modules
+    getAll(key) {
+        return this.data[key] || [];
+    },
+
+    getById(key, id) {
+        const arr = this.getAll(key);
+        return arr.find(item => item && (item.id == id || item.id === id)) || null;
+    },
+
+    create(key, record) {
+        if (!this.data[key]) this.data[key] = [];
+        const id = record.id || (Date.now() + Math.floor(Math.random()*1000));
+        const newItem = { ...record, id };
+        this.data[key].push(newItem);
+        return newItem;
+    },
+
+    remove(key, id) {
+        if (!this.data[key]) return false;
+        const before = this.data[key].length;
+        this.data[key] = this.data[key].filter(item => item && item.id != id);
+        return this.data[key].length < before;
+    },
+
+    update(key, id, patch) {
+        const item = this.getById(key, id);
+        if (!item) return null;
+        Object.assign(item, patch);
+        return item;
+    },
+
+    getSettings() {
+        return this.data['settings'] && Object.keys(this.data['settings']).length ? this.data['settings'] : (this.data['settings'] || {});
+    },
+
+    getHomepage() {
+        return this.data['homepage'] || {};
+    },
+
+    setSession(user) {
+        try {
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            return user;
+        } catch (e) { return null; }
+    },
+
+    getSession() {
+        try {
+            return JSON.parse(localStorage.getItem('currentUser')) || null;
+        } catch(e){ return null; }
+    },
+
+    clearSession() {
+        try { localStorage.removeItem('currentUser'); } catch(e) {}
+    },
+
+    getStats() {
+        return { tablesLoaded: Object.keys(this.data).length };
     }
 };
 

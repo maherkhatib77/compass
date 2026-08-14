@@ -347,8 +347,8 @@
                 logoEl.innerHTML = '🧭';
             }
 
-            // Site name
-            var siteName = hp.siteName[lang] || hp.siteName.he || 'מצפן נט';
+            // Site name (safe access)
+            var siteName = (hp && hp.siteName && (hp.siteName[lang] || hp.siteName.he)) || 'מצפן נט';
             document.getElementById('hpSiteName').textContent = siteName;
             document.title = siteName;
 
@@ -379,10 +379,10 @@
             document.getElementById('hpSidebar').innerHTML = sidebarHtml;
 
             // Main content (rich text from Quill WYSIWYG — must use innerHTML)
-            document.getElementById('hpMain').innerHTML = hp.mainContent[lang] || '';
+            document.getElementById('hpMain').innerHTML = (hp && hp.mainContent && (hp.mainContent[lang] || hp.mainContent.he)) || '';
 
             // Footer (supports HTML — links, copyright text, etc.)
-            document.getElementById('globalFooterText').innerHTML = hp.footerText[lang] || '';
+            document.getElementById('globalFooterText').innerHTML = (hp && hp.footerText && (hp.footerText[lang] || hp.footerText.he)) || '';
             if (typeof GlobalUI !== 'undefined') GlobalUI.apply(currentLang);
         }
 
