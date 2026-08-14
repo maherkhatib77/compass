@@ -1,5 +1,16 @@
 <?php
 /**
+ * API Endpoint
+ * משתמש ב-config-manager.php להגדרות גמישות בין סביבות
+ */
+
+// טעינת הגדרות תצורה מרכזיות
+require_once __DIR__ . '/../config-manager.php';
+
+// הגדרת כותרות CORS
+setCorsHeaders();
+
+/**
 * data-save.php – שמירת נתוני JSON לשרת cPanel/Apache
 * גרסה מעודכנת: מאפשר כתיבה לכל קובץ .json (לאחר basename),
 * כך שקבצים חדשים לא ייחסמו עוד עם "שם קובץ לא מורשה".

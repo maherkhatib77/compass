@@ -1,21 +1,13 @@
 /**
- * ============================================================================
- * מצפן נט - Authentication Module (Advanced Permissions)
- * ============================================================================
- * מנגנון הרשאות מתקדם עם אימות מול API:
- *   - מנהל מערכת (admin/system_admin) = גישה מלאה לכל חלקי המערכת.
- *   - משתמשים אחרים = ניתן להגדיר להם הרשאות לכל חלק בנפרד.
- *   - רמות: "view" (צפייה בלבד) או "full" (מלאה – עריכה, מחיקה, השלמת נתונים).
- *   - אם למשתמש אין אובייקט permissions → ברירת מחדל = גישה מלאה (תאימות לאחור).
- *   - פילטור מדריכים: מדריך פסג"ה רואה רק פתרונות שהוא יצר/אחראי עליהם.
- * ============================================================================
+ * מודול אימות (Auth) - גרסה נקייה למסד נתונים
  */
+const Auth = (function() {
+    'use strict';
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+// שימוש בהגדרות הגלובליות מ-config.js לעבודה עם נתיבים יחסיים
+const AUTH_API_BASE = window.AppConfig ? window.AppConfig.API_BASE_URL : '/api/';
 
-const Auth = (() => {
-
-    const ROLE_LABELS = {
+const ROLE_LABELS = {
         system_admin:    'מנהל מערכת',
         system_operator: 'מפעיל מערכת',
         team_leader:     'חבר בצוות מוביל',
@@ -57,62 +49,115 @@ const Auth = (() => {
         return normalized === 'system_admin' || normalized === 'admin';
     }
 
-    /**
-     * מנקה ערכי קלט מתווים בלתי-נראים (BiDi marks, zero-width chars, BOM).
-     */
-    function _sanitizeInput(str) {
-        if (!str) return '';
-        return str.normalize('NFC').replace(/[\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]/g, '');
+    async function _loginOffline(username, password) {
+        // מוודאים ש-DataStore אותחל לפני שמנסים לגשת למשתמשים
+        if (typeof DataStore === 'undefined' || !DataStore.getAll) {
+            console.error('[Auth] DataStore not available');
+            return { success: false, message: 'מערכת הנתונים לא זמינה' };
+        }
+        
+        const users = DataStore.getAll(DataStore.KEYS.USERS) || [];
+        console.log('[Auth] Checking credentials against', users.length, 'users');
+        
+        const cleanUser = _sanitizeInput(username);
+        const cleanPass = _sanitizeInput(password);
+        
+        const user = users.find(u => {
+            const uUsername = _sanitizeInput(u.username);
+            const uPassword = _sanitizeInput(u.password);
+            console.log('[Auth] Comparing:', { input: cleanUser, stored: uUsername, passMatch: uPassword === cleanPass });
+            return uUsername === cleanUser && uPassword === cleanPass;
+        });
+        
+        if (!user) {
+            console.warn('[Auth] Login failed - user not found or password mismatch');
+            return { success: false, message: 'שם משתמש או סיסמה שגויים' };
+        }
+        
+        console.log('[Auth] Login successful for user:', user.username);
+        const session = DataStore.setSession(user);
+        
+        // שמירת המשתמש ב-localStorage כדי ש-isAuthenticated יעבוד
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        localStorage.setItem('isLoggedIn', 'true');
+        
+        return { success: true, user: { ...user }, session };
     }
 
+    function _sanitizeInput(input) {
+        if (!input) return '';
+        return String(input).trim();
+    }
+
+    /**
+     * פונקציה להתחברות
+     * @param {string} username - שם המשתמש
+     * @param {string} password - הסיסמה
+     * @returns {Promise} - מבטיח תוצאה של הצלחה או כישלון
+     */
     async function login(username, password) {
+        console.log('[Auth] מנסה להתחבר...', username);
+        
         try {
-            // ניסיון התחברות מול ה-API החדש
+            // בדיקה האם אנו בסביבה מקומית
+            const isLocalhost = window.location.hostname === 'localhost' ||
+                               window.location.hostname === '127.0.0.1' ||
+                               window.location.hostname === '' ||
+                               window.location.protocol === 'file:';
+            
+            // בסביבה מקומית - נשתמש בנתוני localStorage/JSON
+            if (isLocalhost) {
+                console.log('[Auth] Local environment detected, using offline mode');
+                return await _loginOffline(username, password);
+            }
+            
+            // ניסיון התחברות מול ה-API החדש (רק בסביבת ייצור)
             const formData = new URLSearchParams();
             formData.append('username', username);
             formData.append('password', password);
             
-            const response = await fetch(`${API_BASE_URL}/auth/login`, {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 שניות timeout
+            
+            const response = await fetch(`${AUTH_API_BASE}login.php`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
+                    'Content-Type': 'application/json'
                 },
-                body: formData
+                body: JSON.stringify({
+                    action: 'login',
+                    username: username,
+                    password: password
+                })
             });
-            
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ detail: 'שגיאה בהתחברות' }));
-                return { success: false, message: errorData.detail || 'שם משתמש או סיסמה שגויים' };
-            }
-            
-            const data = await response.json();
-            
-            // שמירת הטוקן והמידע ב-localStorage
-            localStorage.setItem('matspanet_token', data.token);
-            localStorage.setItem('matspanet_user', JSON.stringify(data.user));
-            localStorage.setItem('matspanet_token_expiry', data.expires_at);
-            
-            return { success: true, user: data.user, token: data.token };
-            
-        } catch (error) {
-            console.error('Login error:', error);
-            // Fallback למערכת הישנה אם ה-API לא זמין
-            console.warn('⚠️ API לא זמין, מעבר למצב Offline');
-            return _loginOffline(username, password);
-        }
-    }
 
-    function _loginOffline(username, password) {
-        const users = DataStore && DataStore.getAll(DataStore.KEYS.USERS) || [];
-        const cleanUser = _sanitizeInput(username);
-        const cleanPass = _sanitizeInput(password);
-        const user = users.find(u => _sanitizeInput(u.username) === cleanUser && _sanitizeInput(u.password) === cleanPass);
-        if (!user) {
-            return { success: false, message: 'שם משתמש או סיסמה שגויים' };
+            clearTimeout(timeoutId);
+
+            // בדיקת סטטוס תגובה
+            if (!response.ok) {
+                const errText = await response.text();
+                console.error('[Auth] שגיאת HTTP:', response.status, errText);
+                throw new Error(`שגיאת שרת: ${response.status}`);
+            }
+
+            const result = await response.json();
+            
+            if (result.success) {
+                // שמירת המשתמש בזיכרון
+                localStorage.setItem('currentUser', JSON.stringify(result.user));
+                localStorage.setItem('isLoggedIn', 'true');
+                console.log('[Auth] התחברות הצליחה! מעביר לדאשבורד...');
+            }
+
+            return result;
+
+        } catch (error) {
+            console.error('[Auth] שגיאה חמורה:', error);
+            return {
+                success: false,
+                message: 'שגיאת תקשורת: ' + error.message
+            };
         }
-        
-        const session = DataStore ? DataStore.setSession(user) : null;
-        return { success: true, user: { ...user }, session };
     }
 
     function logout() {
@@ -124,7 +169,7 @@ const Auth = (() => {
         // קריאה ל-API להתנתקות (אופציונלי)
         const token = localStorage.getItem('matspanet_token');
         if (token) {
-            fetch(`${API_BASE_URL}/auth/logout`, {
+            fetch(`${AUTH_API_BASE}logout.php`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -139,67 +184,36 @@ const Auth = (() => {
         window.location.href = './login.html';
     }
 
-    function getCurrentUser() {
-        // בדיקה אם יש משתמש מאומת מה-API
-        const apiUser = localStorage.getItem('matspanet_user');
-        if (apiUser) {
-            try {
-                return JSON.parse(apiUser);
-            } catch (e) {
-                console.error('Failed to parse API user:', e);
-            }
-        }
-        
-        // Fallback למערכת הישנה
-        if (DataStore) {
-            const session = DataStore.getSession();
-            if (!session) return null;
-            const user = DataStore.getById(DataStore.KEYS.USERS, session.userId);
-            return user ? { ...user, session } : null;
-        }
-        
-        return null;
+    /**
+     * בדיקה אם המשתמש מחובר
+     */
+    function isAuthenticated() {
+        return localStorage.getItem('currentUser') !== null;
     }
 
-    function getSession() {
-        return DataStore ? DataStore.getSession() : null;
+    /**
+     * קבלת פרטי המשתמש
+     */
+    function getCurrentUser() {
+        const userStr = localStorage.getItem('currentUser');
+        if (!userStr) return null;
+        try {
+            return JSON.parse(userStr);
+        } catch (e) {
+            return null;
+        }
     }
 
     function getToken() {
         return localStorage.getItem('matspanet_token');
     }
 
-    function isTokenValid() {
-        const token = localStorage.getItem('matspanet_token');
-        const expiry = localStorage.getItem('matspanet_token_expiry');
-        
-        if (!token || !expiry) return false;
-        
-        try {
-            const expiryDate = new Date(expiry);
-            return expiryDate > new Date();
-        } catch (e) {
+    function requireAuth() {
+        if (!isAuthenticated()) {
+            window.location.href = './login.html';
             return false;
         }
-    }
-
-    function requireAuth() {
-        const user = getCurrentUser();
-        if (!user) {
-            window.location.href = './login.html';
-            return null;
-        }
-        return user;
-    }
-
-    function isAdmin() {
-        const user = getCurrentUser();
-        return user ? _isAdminRole(user.role) : false;
-    }
-
-    function isGuide() {
-        const user = getCurrentUser();
-        return user ? (_normalizeRole(user.role) === 'guide' || _normalizeRole(user.role) === 'instructor') : false;
+        return true;
     }
 
     // ===== PERMISSION CHECKING =====
@@ -264,13 +278,15 @@ const Auth = (() => {
         const token = getToken();
         if (token) {
             try {
-                const response = await fetch(`${API_BASE_URL}/users/${userId}/password`, {
-                    method: 'PUT',
+                const response = await fetch(`${AUTH_API_BASE}update_user.php`, {
+                    method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
+                        user_id: userId,
+                        action: 'change_password',
                         old_password: oldPassword,
                         new_password: newPassword
                     })
@@ -305,7 +321,7 @@ const Auth = (() => {
         const token = getToken();
         if (token) {
             try {
-                const response = await fetch(`${API_BASE_URL}/users`, {
+                const response = await fetch(`${AUTH_API_BASE}create_user.php`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -341,11 +357,16 @@ const Auth = (() => {
         return { success: false, message: 'מערכת לא זמינה' };
     }
 
-    async function getAllUsers() {
+    function getAllUsers() {
+        // Fallback למערכת הישנה - מחזיר מיד נתונים ללא המתנה
+        return DataStore ? DataStore.getAll(DataStore.KEYS.USERS) : [];
+    }
+
+    async function getAllUsersAsync() {
         const token = getToken();
         if (token) {
             try {
-                const response = await fetch(`${API_BASE_URL}/users`, {
+                const response = await fetch(`${AUTH_API_BASE}get_users.php`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -368,11 +389,15 @@ const Auth = (() => {
         const token = getToken();
         if (token) {
             try {
-                const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
-                    method: 'DELETE',
+                const response = await fetch(`${AUTH_API_BASE}delete_user.php`, {
+                    method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: userId
+                    })
                 });
                 
                 if (response.ok) {
@@ -396,34 +421,32 @@ const Auth = (() => {
             DataStore.remove(DataStore.KEYS.USERS, userId);
             return { success: true };
         }
-        
-        return { success: false, message: 'מערכת לא זמינה' };
+        return true;
     }
 
-    function getAllRoles() {
-        return Object.keys(ROLE_LABELS).map(k => ({ value: k, label: ROLE_LABELS[k] }));
-    }
-
-    function getRoleLabel(role) {
-        return ROLE_LABELS[_normalizeRole(role)] || role || '—';
-    }
-
-    function getRoleBadge(role) {
-        const r = _normalizeRole(role);
-        const cls = ROLE_BADGES[r] || 'gray';
-        const label = ROLE_LABELS[r] || role || '—';
-        return '<span class="badge badge-' + cls + '">' + label + '</span>';
-    }
-
+    // חשיפת הפונקציות החוצה
     return {
-        login, logout, getCurrentUser, getSession, requireAuth, getToken, isTokenValid,
-        isAdmin, isGuide,
-        hasPermission, hasUserPermission,
-        canViewSection, canFullSection,
-        canViewSolution, canEditSolution, canDeleteSolution,
-        setUserPermissions, resetUserPermissions,
-        changePassword, createUser, getAllUsers, deleteUser,
-        getAllRoles, getRoleLabel, getRoleBadge,
-        ROLE_LABELS, ROLE_BADGES
+        login: login,
+        logout: logout,
+        isAuthenticated: isAuthenticated,
+        getCurrentUser: getCurrentUser,
+        requireAuth: requireAuth,
+        canViewSection: canViewSection,
+        canFullSection: canFullSection,
+        hasPermission: hasPermission,
+        hasUserPermission: hasUserPermission,
+        canViewSolution: canViewSolution,
+        canEditSolution: canEditSolution,
+        canDeleteSolution: canDeleteSolution,
+        setUserPermissions: setUserPermissions,
+        resetUserPermissions: resetUserPermissions,
+        changePassword: changePassword,
+        createUser: createUser,
+        getAllUsers: getAllUsers,
+        getAllUsersAsync: getAllUsersAsync,
+        deleteUser: deleteUser,
+        ROLE_LABELS: ROLE_LABELS,
+        ROLE_BADGES: ROLE_BADGES
     };
+
 })();

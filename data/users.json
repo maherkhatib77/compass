@@ -9,5 +9,27 @@
     "isActive": true,
     "createdAt": "2024-09-01T00:00:00.000Z",
     "updatedAt": "2024-09-01T00:00:00.000Z"
+  },
+  {
+    "id": "usr_guide1_001",
+    "username": "guide1",
+    "password": "guide123",
+    "fullName": "רחל כהן",
+    "email": "rachel@education.gov.il",
+    "role": "guide",
+    "isActive": true,
+    "createdAt": "2024-09-01T00:00:00.000Z",
+    "updatedAt": "2024-09-01T00:00:00.000Z"
+  },
+  {
+    "id": "usr_guide2_001",
+    "username": "guide2",
+    "password": "guide123",
+    "fullName": "דוד לוי",
+    "email": "david@education.gov.il",
+    "role": "guide",
+    "isActive": true,
+    "createdAt": "2024-09-01T00:00:00.000Z",
+    "updatedAt": "2024-09-01T00:00:00.000Z"
   }
 ]

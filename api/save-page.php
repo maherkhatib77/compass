@@ -1,5 +1,16 @@
 <?php
 /**
+ * API Endpoint
+ * משתמש ב-config-manager.php להגדרות גמישות בין סביבות
+ */
+
+// טעינת הגדרות תצורה מרכזיות
+require_once __DIR__ . '/../config-manager.php';
+
+// הגדרת כותרות CORS
+setCorsHeaders();
+
+/**
  * save-page.php – Create/update an HTML file in /pages/ directory
  * Receives: { "filename": "about-us", "titleHe": "...", "titleAr": "...", "content": "<p>...</p>" }
  */

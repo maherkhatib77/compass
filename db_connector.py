@@ -37,8 +37,10 @@ class DatabaseManager:
             conn.close()
             print("✅ חיבור ל-MySQL הוקם בהצלחה.")
         except Exception as e:
-            print(f"❌ שגיאה בחיבור ל-MySQL: {e}")
-            raise
+            print(f"⚠️ אזהרה בחיבור ל-MySQL: {e}")
+            print("⚠️ השרת ימשיך לעבוד אך קריאות API לדאטה בייס ייכשלו")
+            # לא זורק exception כדי לאפשר לשרת לעבוד גם ללא DB
+            # raise
     
     def get_connection(self):
         """מחזיר חיבור למסד הנתונים"""

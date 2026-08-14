@@ -33,6 +33,8 @@ app.mount("/static", StaticFiles(directory="."), name="static")
 app.mount("/css", StaticFiles(directory="css"), name="css")
 app.mount("/js", StaticFiles(directory="js"), name="js")
 app.mount("/data", StaticFiles(directory="data"), name="data")
+# הערה: לא להשתמש ב-StaticFiles עבור /api כדי לאפשר ל-FastAPI לטפל בקבצי PHP באופן דינמי
+# app.mount("/api", StaticFiles(directory="api"), name="api")
 
 # אתחול מסד הנתונים
 db = DatabaseManager()
@@ -90,6 +92,48 @@ def require_role(required_roles: List[str]):
 @app.get("/")
 def read_root():
     return FileResponse("index.html")
+
+
+@app.get("/api/get_solutions.php")
+def get_solutions_php():
+    """מחזיר פתרונות למידה - תואם ל-get_solutions.php"""
+    try:
+        query = "SELECT * FROM learning_solutions ORDER BY id DESC"
+        results = db.fetch_all(query)
+        
+        # המרת datetime ל-string
+        processed_results = []
+        for row in results:
+            processed_row = {}
+            for key, value in row.items():
+                if hasattr(value, 'strftime'):
+                    processed_row[key] = value.strftime('%Y-%m-%d %H:%M:%S')
+                else:
+                    processed_row[key] = value
+            processed_results.append(processed_row)
+        
+        return JSONResponse(content=processed_results, media_type="application/json; charset=UTF-8")
+    except Exception as e:
+        # החזרת מערך ריק אם אין DB
+        print(f"⚠️ שגיאה בשליפת פתרונות: {e}")
+        return JSONResponse(content=[], media_type="application/json; charset=UTF-8")
+
+
+@app.get("/api/{file_path:path}")
+def serve_api_file(file_path: str):
+    """מגיש קבצי PHP מהתיקייה api/"""
+    file_location = os.path.join("api", file_path)
+    if os.path.isfile(file_location) and file_path.endswith('.php'):
+        # קריאת הקובץ והחזרת התוכן שלו
+        with open(file_location, "r", encoding="utf-8") as f:
+            content = f.read()
+        return JSONResponse(content={"raw": content}, media_type="text/plain")
+    raise HTTPException(status_code=404, detail="קובץ לא נמצא")
+
+
+@app.get("/dashboard.html")
+def read_dashboard():
+    return FileResponse("dashboard.html")
 
 
 @app.get("/api/health")

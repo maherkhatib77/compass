@@ -1,5 +1,16 @@
 <?php
 /**
+ * API Endpoint
+ * משתמש ב-config-manager.php להגדרות גמישות בין סביבות
+ */
+
+// טעינת הגדרות תצורה מרכזיות
+require_once __DIR__ . '/../config-manager.php';
+
+// הגדרת כותרות CORS
+setCorsHeaders();
+
+/**
  * health-log.php – יומן שגיאות ותיקון הרשאות ל-cPanel/Apache/PHP
  * מטפל ב-GET/POST /api/health-log
  */

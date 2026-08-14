@@ -1,73 +1,105 @@
 /**
  * api-loader.js
- * אחראי על טעינת נתונים משרת ה-API (Python/FastAPI) 
- * וזריקתם למערכת במקום קריאת קבצי JSON ישירים.
+ * גרסה מתוקנת: מזהה אוטומטית את נתיב הפרויקט (localhost/compass או ענן)
+ * ומבצע בקשה מדויקת לקבצי ה-PHP (get_solutions.php וכו').
  */
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+// פונקציה חכמה לבניית נתיב מלא לקובץ PHP ספציפי
+function getPhpApiUrl(endpointName) {
+    // מיפוי שמות ה-API לקבצי PHP פיזיים
+    const fileMap = {
+        'solutions': 'get_solutions.php',
+        'users': 'get_users.php',
+        'catalog': 'get_catalog.php'
+    };
 
-/**
- * פונקציה ראשית לאתחול הטעינה
- */
+    const fileName = fileMap[endpointName] || `get_${endpointName}.php`;
+    
+    // זיהוי הנתיב הבסיסי של הדף הנוכחי
+    const pathParts = window.location.pathname.split('/').filter(p => p.length > 0);
+    
+    // אם אנחנו ב-localhost בתיקייה (למשל compass), נשמור אותה. אם בשורש, נשאיר ריק.
+    // אנו מניחים שהתיקייה הראשונה היא שם הפרויקט ב-localhost.
+    let baseDir = '';
+    if (pathParts.length > 0 && window.location.hostname === 'localhost') {
+        baseDir = '/' + pathParts[0];
+    }
+    
+    // בניית הנתיב הסופי: /compass/api/get_solutions.php או /api/get_solutions.php
+    return `${baseDir}/api/${fileName}`;
+}
+
 async function initApiData() {
-    console.log('🔄 טוען נתונים מה-API החדש...');
+    console.log('🔄 טוען נתונים מה-API החדש (PHP) עם זיהוי נתיב חכם...');
 
     try {
-        // 1. טעינת פתרונות למידה
-        const solutionsRes = await fetch(`${API_BASE_URL}/solutions`);
-        if (!solutionsRes.ok) throw new Error('נכשל בטעינת פתרונות');
+        // 1. טעינת פתרונות למידה - שימוש בפונקציה החכמה
+        const solutionsUrl = getPhpApiUrl('solutions');
+        console.log('📡 מבצע בקשה ל:', solutionsUrl);
+        
+        const solutionsRes = await fetch(solutionsUrl);
+        
+        if (!solutionsRes.ok) {
+            throw new Error(`שרת החזיר שגיאה ${solutionsRes.status}: ${solutionsRes.statusText}`);
+        }
+        
         const solutionsData = await solutionsRes.json();
         
         // עדכון המשתמש הגלובלי אם קיים
         if (typeof window.DataStore !== 'undefined' && typeof DataStore.set === 'function') {
-             DataStore.set('solutions', solutionsData.data || []);
+             DataStore.set('solutions', solutionsData.data || solutionsData || []);
         } else if (window.solutions) {
-             window.solutions = solutionsData.data || [];
+             window.solutions = solutionsData.data || solutionsData || [];
         }
-        console.log(`✅ נטענו ${solutionsData.count || 0} פתרונות מה-API`);
+        console.log(`✅ נטענו ${(solutionsData.data ? solutionsData.data.length : (Array.isArray(solutionsData) ? solutionsData.length : 0))} פתרונות מה-API`);
 
-        // 2. טעינת משתמשים
-        const usersRes = await fetch(`${API_BASE_URL}/users`);
-        if (!usersRes.ok) throw new Error('נכשל בטעינת משתמשים');
-        const usersData = await usersRes.json();
-        
-        if (typeof window.DataStore !== 'undefined' && typeof DataStore.set === 'function') {
-            DataStore.set('users', usersData.data || []);
-        } else if (window.users) {
-            window.users = usersData.data || [];
+        // 2. טעינת משתמשים (אופציונלי)
+        try {
+            const usersUrl = getPhpApiUrl('users');
+            const usersRes = await fetch(usersUrl);
+            
+            if (usersRes.ok) {
+                const usersData = await usersRes.json();
+                if (typeof window.DataStore !== 'undefined' && typeof DataStore.set === 'function') {
+                    DataStore.set('users', usersData.data || usersData || []);
+                } else if (window.users) {
+                    window.users = usersData.data || usersData || [];
+                }
+                console.log(`✅ נטענו ${(usersData.data ? usersData.data.length : (Array.isArray(usersData) ? usersData.length : 0))} משתמשים`);
+            } else {
+                console.warn('⚠️ לא נטענו משתמשים (סטטוס ' + usersRes.status + ')');
+                if (typeof window.DataStore !== 'undefined' && typeof DataStore.set === 'function') DataStore.set('users', []);
+                else if (!window.users) window.users = [];
+            }
+        } catch (usersError) {
+            console.warn('⚠️ שגיאה בטעינת משתמשים:', usersError.message);
+            if (typeof window.DataStore !== 'undefined' && typeof DataStore.set === 'function') DataStore.set('users', []);
+            else if (!window.users) window.users = [];
         }
-        console.log(`✅ נטענו ${usersData.count || 0} משתמשים`);
 
-        // 3. זיהוי וביצוע אתחול ממשק (UI Initialization) - רק פונקציות שקיימות בפועל
+        // 3. אתחול ממשק
         setTimeout(() => {
-            // נסה לאתחל פתרונות אם הפונקציה קיימת
             if (typeof renderSolutions === 'function') {
                 console.log('🎨 מרענן תצוגת פתרונות...');
                 renderSolutions();
             }
-            
-            // נסה לאתחל דשבורד אם הפונקציה קיימת
             if (typeof initDashboard === 'function') {
                 console.log('🎨 מאתחל דשבורד...');
                 initDashboard();
             }
-
-            // נסה לקרוא לפונקציה גלובלית לרענון כללי אם קיימת ב-data.js או app.js
             if (typeof window.refreshAllViews === 'function') {
                 window.refreshAllViews();
             }
-            
             console.log('✅ אתחול ממשק הושלם לאחר טעינת נתוני API');
-        }, 800); // המתנה קלה כדי לוודא שכל הסקריפטים האחרים נטענו
+        }, 500);
 
     } catch (error) {
         console.error('❌ שגיאה קריטית בטעינת ה-API:', error);
-        // אל תציג alert מפניע אלא אם חובה, מסתפקים בקונסול בינתיים
-        // alert('שגיאה בטעינת נתונים מהשרת. וודא ש-python main.py רץ בחלון נפרד.');
+        console.error('💡 וודא שקובץ ה-PHP קיים בתיקיית api ומחזיר JSON תקין.');
     }
 }
 
-// הפעלה אוטומטית כאשר הדף מוכן
+// הפעלה אוטומטית
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof window.DataStore !== 'undefined' && DataStore.init) {
@@ -77,7 +109,6 @@ if (document.readyState === 'loading') {
         }
     });
 } else {
-    // הדף כבר נטען, הרץ מיד
     if (typeof window.DataStore !== 'undefined' && DataStore.init) {
         DataStore.init(false).then(initApiData).catch(initApiData);
     } else {

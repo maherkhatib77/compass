@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+</head>
+<body>
+
+<!-- דוגמה לקטע שיש להוסיף בתוך dashboard.html באזור המתאים -->
+<div class="card">
+    <h3>ניהול מפקחים</h3>
+    
+    <!-- טופס הוספה -->
+    <div style="background:#f9f9f9; padding:15px; margin-bottom:15px; border-radius:5px;">
+        <h4>הוסף מפקח חדש</h4>
+        <input type="text" id="sup_name" placeholder="שם מלא" style="padding:5px;">
+        <input type="text" id="sup_region" placeholder="אזור" style="padding:5px;">
+        <input type="text" id="sup_phone" placeholder="טלפון" style="padding:5px;">
+        <button onclick="addSupervisor()" style="padding:5px 10px; background:green; color:white; border:none; cursor:pointer;">שמור</button>
+    </div>
+
+    <!-- טבלת הצגה -->
+    <table border="1" cellpadding="8" cellspacing="0" style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>שם</th>
+                <th>אזור</th>
+                <th>טלפון</th>
+                <th>סטטוס</th>
+            </tr>
+        </thead>
+        <tbody id="supervisors_table_body">
+            <tr><td colspan="5">טוען...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+const API_VALUES_URL = '/compass/api/manage_values.php'; // או הנתיב היחסי המתאים
+
+// פונקציה לטעינת נתונים
+async function loadSupervisors() {
+    const tbody = document.getElementById('supervisors_table_body');
+    try {
+        const res = await fetch(`${API_VALUES_URL}?table=supervisors&action=get`);
+        const json = await res.json();
+        
+        if (json.status === 'success') {
+            tbody.innerHTML = '';
+            if (json.data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5">אין נתונים</td></tr>';
+                return;
+            }
+            json.data.forEach(item => {
+                const row = `<tr>
+                    <td>${item.id}</td>
+                    <td>${item.name}</td>
+                    <td>${item.region}</td>
+                    <td>${item.phone}</td>
+                    <td>${item.is_active ? 'פעיל' : 'לא פעיל'}</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        } else {
+            tbody.innerHTML = `<tr><td colspan="5" style="color:red">שגיאה: ${json.error}</td></tr>`;
+        }
+    } catch (e) {
+        console.error(e);
+        tbody.innerHTML = `<tr><td colspan="5" style="color:red">שגיאת תקשורת</td></tr>`;
+    }
+}
+
+// פונקציה להוספת מפקח
+async function addSupervisor() {
+    const name = document.getElementById('sup_name').value;
+    const region = document.getElementById('sup_region').value;
+    const phone = document.getElementById('sup_phone').value;
+
+    if (!name) { alert('חובה להזין שם'); return; }
+
+    try {
+        const res = await fetch(`${API_VALUES_URL}?table=supervisors`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ name, region, phone })
+        });
+        const json = await res.json();
+        
+        if (json.status === 'success') {
+            alert('נשמר בהצלחה!');
+            document.getElementById('sup_name').value = '';
+            document.getElementById('sup_region').value = '';
+            document.getElementById('sup_phone').value = '';
+            loadSupervisors(); // רענון הטבלה
+        } else {
+            alert('שגיאה בשמירה: ' + json.error);
+        }
+    } catch (e) {
+        alert('שגיאת תקשורת');
+    }
+}
+
+// טעינה ראשונית
+document.addEventListener('DOMContentLoaded', loadSupervisors);
+</script>
+
+</body>
+</html>

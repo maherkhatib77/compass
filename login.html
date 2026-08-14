@@ -313,257 +313,88 @@ button{font-family:inherit}
 <div class="toast" id="toast"></div>
 
 <!-- ספריות המערכת -->
+<script src="./config.js"></script>
 <script src="./js/data.js"></script>
 <script src="./js/auth.js"></script>
-
 <script>
-/* ================================================================
-   לוגיקת מסך הכניסה
-   ----------------------------------------------------------------
-   אבטחה: פרטי בדיקה (סיסמאות) אינם נמצאים בקובץ זה כלל.
-   הם חיים בקובץ נפרד:  ./js/dev-creds.js
-   הקובץ הזה נטען אך ורק כאשר המערכת מזהה סביבה מקומית
-   (localhost / file:// / רשת פרטית). בשרת הייצור הקובץ לעולם
-   לא נטען — ולכן אין שום זכר לסיסמאות בדף הפומבי.
-   ================================================================ */
-(function () {
-  'use strict';
-
-  var el = function (id) { return document.getElementById(id); };
-  var _busy = false;
-
-  /* ---------- זיהוי סביבה מקומית ---------- */
-  function isLocalEnv() {
-    try {
-      var h = (window.location.hostname || '').toLowerCase();
-      var p = window.location.protocol || '';
-      if (p === 'file:') return true;
-      if (h === '' || h === 'localhost' || h === '127.0.0.1' || h === '::1') return true;
-      if (h.indexOf('127.') === 0) return true;        // loopback
-      if (h.indexOf('192.168.') === 0) return true;    // רשת ביתית
-      if (h.indexOf('10.') === 0) return true;         // רשת פרטית
-      if (h.indexOf('172.') === 0) return true;        // רשת פרטית
-      if (h.slice(-6) === '.local') return true;
-      return false;
-    } catch (e) { return false; }
-  }
-
-  /* ---------- מילוי מותג מהגדרות המערכת ---------- */
-  function applyBrand() {
-    try {
-      if (typeof DataStore === 'undefined' || !DataStore.getSettings) return;
-      var s = DataStore.getSettings() || {};
-      if (s.siteNameHe && el('brandName')) el('brandName').textContent = s.siteNameHe;
-      if (s.logoUrl && el('brandLogo')) el('brandLogo').innerHTML = '<img src="' + s.logoUrl + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:18px;">';
-      if (s.copyrightHe && el('cardFoot')) el('cardFoot').textContent = s.copyrightHe;
-    } catch (e) {}
-  }
-
-  /* ---------- שעון חי ---------- */
-  function tickClock() {
-    var c = el('liveClock'); if (!c) return;
-    try {
-      c.textContent = new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-    } catch (e) {}
-  }
-
-  /* ---------- Toast ---------- */
-  var _toastT;
-  function toast(msg) {
-    var t = el('toast'); if (!t) return;
-    t.textContent = msg; t.classList.add('show');
-    clearTimeout(_toastT); _toastT = setTimeout(function () { t.classList.remove('show'); }, 2200);
-  }
-
-  /* ---------- שגיאה / עסוק ---------- */
-  function showError(msg) {
-    var box = el('errorBox'); el('errorText').textContent = msg || 'שם משתמש או סיסמה שגויים';
-    box.classList.remove('show'); void box.offsetWidth; box.classList.add('show');
-  }
-  function hideError() { el('errorBox').classList.remove('show'); }
-  function setBusy(on) {
-    _busy = on;
-    var btn = el('submitBtn'), lbl = el('submitLabel');
-    btn.disabled = on;
-    lbl.innerHTML = on ? '<span class="spinner"></span> מתחבר…' : 'כניסה למערכת';
-  }
-
-  /* ---------- הצג / הסתר סיסמה ---------- */
-  function wireEye() {
-    var btn = el('eyeBtn'), inp = el('password');
-    if (!btn || !inp) return;
-    btn.addEventListener('click', function () {
-      var show = inp.type === 'password';
-      inp.type = show ? 'text' : 'password';
-      btn.textContent = show ? '🙈' : '👁️';
-      btn.title = show ? 'הסתר' : 'הצג';
-    });
-  }
-
-  /* ---------- "זכור אותי" (שם משתמש בלבד!) ---------- */
-  function restoreRemembered() {
-    try {
-      var u = localStorage.getItem('matspanet_remember_user');
-      if (u) { el('username').value = u; el('remember').checked = true; el('password').focus(); }
-    } catch (e) {}
-  }
-
-  /* ---------- כניסה ---------- */
-  function handleLogin(e) {
-    e.preventDefault();
-    if (_busy) return false;
-    var u = el('username').value.trim();
-    var pw = el('password').value;
-    hideError();
-    if (!u || !pw) { showError('יש להזין שם משתמש וסיסמה'); return false; }
-
-    // זכור אותי — שם משתמש בלבד, לעולם לא הסיסמה
-    try {
-      if (el('remember').checked) localStorage.setItem('matspanet_remember_user', u);
-      else localStorage.removeItem('matspanet_remember_user');
-    } catch (err) {}
-
-    setBusy(true);
-
-    function done(ok, msg) {
-      setBusy(false);
-      if (ok) { window.location.href = './dashboard.html'; }
-      else { showError(msg); }
-    }
-
-    // מסלול ראשי: דרך מודול האימות
-    if (typeof Auth !== 'undefined' && typeof Auth.login === 'function') {
-      try {
-        var result = Auth.login(u, pw);
-        if (result && result.success) { done(true); }
-        else { done(false, result && result.message); }
-      } catch (err) {
-        done(false, 'שגיאת התחברות: ' + err.message);
-      }
-      return false;
-    }
-
-    // מסלול גיבוי: בדיקה ישירה מול חנות המשתמשים
-    var users = (typeof DataStore !== 'undefined') ? (DataStore.getAll(DataStore.KEYS.USERS) || []) : [];
-    var found = null;
-    for (var i = 0; i < users.length; i++) {
-      if ((users[i].username || '').trim() === u && (users[i].password || '') === pw) { found = users[i]; break; }
-    }
-    if (found) {
-      if (typeof DataStore !== 'undefined' && DataStore.setSession) DataStore.setSession(found);
-      done(true);
-    } else {
-      done(false);
-    }
-    return false;
-  }
-
-  /* ============================================================
-     פאנל בדיקה מקומי — נבנה רק אם הסביבה מקומית
-     ============================================================ */
-  function fillDevCreds(i) {
-    var list = window.__DEV_CREDS__; if (!list || !list[i]) return;
-    var u = el('username'), p = el('password');
-    u.value = list[i].user; p.value = list[i].pass;
-    ['wrapUser', 'wrapPass'].forEach(function (id) {
-      var w = el(id); if (!w) return;
-      w.classList.remove('flash'); void w.offsetWidth; w.classList.add('flash');
-    });
-    el('remember').checked = true;
-    toast('פרטי הבדיקה מולאו — לחצו "כניסה"');
-  }
-
-  function renderDevPanel() {
-    var mount = el('devMount'); if (!mount) return;
-    var list = window.__DEV_CREDS__;
-    if (!list || !list.length) { renderDevMissing('הקובץ נטען אך הוא ריק.'); return; }
-    var rows = list.map(function (c, i) {
-      return '<div class="dev-row">' +
-        '<span class="who"><b>' + esc(c.role) + '</b><code>' + esc(c.user) + ' / ' + esc(c.pass) + '</code></span>' +
-        '<button type="button" class="dev-fill" data-i="' + i + '">מילוי אוטומטי</button>' +
-        '</div>';
-    }).join('');
-    mount.innerHTML =
-      '<div class="dev-panel">' +
-        '<div class="dev-title">🔧 סביבת בדיקה מקומית</div>' +
-        '<div class="dev-note">פרטים אלו מוצגים רק במחשב שלך (localhost) ואינם מועלים לשרת הייצור.</div>' +
-        '<div class="dev-rows">' + rows + '</div>' +
-      '</div>';
-    var btns = mount.querySelectorAll('.dev-fill');
-    for (var k = 0; k < btns.length; k++) {
-      btns[k].addEventListener('click', function () { fillDevCreds(parseInt(this.getAttribute('data-i'), 10)); });
-    }
-  }
-
-  function renderDevMissing(extra) {
-    var mount = el('devMount'); if (!mount) return;
-    mount.innerHTML =
-      '<div class="dev-panel">' +
-        '<div class="dev-title">🔧 סביבת בדיקה מקומית</div>' +
-        '<div class="dev-missing">לא נמצאו פרטי בדיקה. כדי להציגם, צרו את הקובץ ' +
-        '<code>js/dev-creds.js</code> (ראו הוראות).' + (extra ? ' ' + esc(extra) : '') + '</div>' +
-      '</div>';
-  }
-
-  function esc(s) {
-    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-
-  /* טוען את dev-creds.js רק בסביבה מקומית */
-  function maybeLoadDevCreds() {
-    if (!isLocalEnv()) return;            // בייצור: לא עושים דבר — אין זכר לסיסמאות
-    var s = document.createElement('script');
-    s.src = './js/dev-creds.js';
-    s.onload = function () { renderDevPanel(); };
-    s.onerror = function () { renderDevMissing(); };
-    document.head.appendChild(s);
-  }
-
-  /* ---------- אתחול ---------- */
-  function boot() {
-    el('footYear').textContent = new Date().getFullYear();
-    tickClock(); setInterval(tickClock, 15000);
-    wireEye();
-    restoreRemembered();
-    el('loginForm').addEventListener('submit', handleLogin);
-    el('forgotBtn').addEventListener('click', function () { toast('לאיפוס סיסמה יש לפנות למנהל המערכת'); });
-
-    applyBrand();
-    maybeLoadDevCreds();
-
-    // המתנה לאתחול הנתונים לפני שחרור כפתור הכניסה
-    var released = false;
-    function release() { if (released) return; released = true; setBusy(false); }
-    setBusy(true); // נועל עד שהנתונים מוכנים
-
-    if (typeof DataStore !== 'undefined' && DataStore.init) {
-      var settled = false;
-      var finishInit = function () {
-        if (settled) return; settled = true;
-        applyBrand();
-        // אם כבר מחובר — מעבר ישיר
+// המתנה לטעינת הדף
+document.addEventListener('DOMContentLoaded', async function() {
+    // אתחול DataStore לפני כל פעולה אחרת
+    console.log('[Login] Initializing DataStore...');
+    if (typeof DataStore !== 'undefined' && typeof DataStore.init === 'function') {
         try {
-          var sess = DataStore.getSession && DataStore.getSession();
-          if (sess && sess.userId) { window.location.href = './dashboard.html'; return; }
-        } catch (e) {}
-        release();
-      };
-      try {
-        // אתחול רגיל (ללא טעינה מחדש מהשרת) כדי לשמור על הנתונים ב-localStorage
-        var p = DataStore.init(false);
-        if (p && typeof p.then === 'function') p.then(finishInit, finishInit);
-        else finishInit();
-      } catch (e) { finishInit(); }
-      // רשת ביטחון: אם האתחול מתעכב, נשחרר בכל זאת
-      setTimeout(finishInit, 5000);
-    } else {
-      release();
+            await DataStore.init();
+            console.log('[Login] DataStore initialized successfully');
+        } catch (error) {
+            console.error('[Login] Failed to initialize DataStore:', error);
+        }
     }
-  }
+    
+    // אלמנטים בטופס
+    const loginForm = document.getElementById('loginForm');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const errorBox = document.getElementById('errorBox');
+    const errorText = document.getElementById('errorText');
+    const submitBtn = document.getElementById('submitBtn');
+    const submitLabel = document.getElementById('submitLabel');
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
-  else boot();
-})();
+    // פונקציה להצגת שגיאה
+    function showError(msg) {
+        errorText.textContent = msg;
+        errorBox.classList.add('show');
+        submitBtn.disabled = false;
+        submitLabel.innerHTML = 'כניסה למערכת';
+    }
+
+    // טיפול בשליחת הטופס
+    loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault(); // מניעת רענון הדף
+
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value;
+
+        // איפוס שגיאות
+        errorBox.classList.remove('show');
+        
+        if (!username || !password) {
+            showError('נא למלא שם משתמש וסיסמה');
+            return;
+        }
+
+        // מצב טעינה
+        submitBtn.disabled = true;
+        submitLabel.innerHTML = '<span class="spinner"></span> מתחבר...';
+
+        // קריאה לפונקציה מהקובץ auth.js
+        if (typeof Auth === 'undefined') {
+            showError('שגיאת מערכת: מודול האימות לא נטען.');
+            console.error('האובייקט Auth לא קיים. בדוק את js/auth.js');
+            return;
+        }
+
+        try {
+            const result = await Auth.login(username, password);
+
+            if (result && result.success) {
+                // הצלחה - מעבר לדאשבורד
+                window.location.href = 'dashboard.html';
+            } else {
+                // כישלון - הצגת הודעה
+                showError(result.message || 'שם משתמש או סיסמה שגויים');
+            }
+        } catch (err) {
+            console.error(err);
+            showError('שגיאה בלתי צפויה: ' + err.message);
+        }
+    });
+
+    // בדיקה אם כבר מחובר (למקרה של רענון)
+    if (typeof Auth !== 'undefined' && Auth.isAuthenticated()) {
+        window.location.href = 'dashboard.html';
+    }
+});
 </script>
+
 </body>
 </html>

@@ -1281,27 +1281,51 @@ const App = (() => {
         return AppContext.activePeriod;
     }
 
-    function _loadActivePeriod() {
-        var periods = DataStore.getAll(DataStore.KEYS.PERIODS) || [];
-        var active = null;
-        for (var i = 0; i < periods.length; i++) {
-            if (periods[i].isActive) { active = periods[i]; break; }
-        }
-        AppContext.activePeriod = active;
-        AppContext.displayPeriod = _resolveDisplayPeriod();
-
-        // Silent migration: assign periodId to legacy solutions that don't have one
-        if (active) {
-            var allSols = DataStore.getAll(DataStore.KEYS.SOLUTIONS) || [];
-            for (var j = 0; j < allSols.length; j++) {
-                if (!allSols[j].periodId) {
-                    DataStore.update(DataStore.KEYS.SOLUTIONS, allSols[j].id, { periodId: active.id });
+	// חפש את הפונקציה _loadActivePeriod ובצע בה את השינוי הבא:
+    _loadActivePeriod: function() {
+        try {
+            console.log('🔄 מנסה לטעון תקופה פעילה...');
+            
+            // שליפת נתונים מה-DataStore (שהוא המקור האמיתי עכשיו)
+            const periods = (typeof DataStore !== 'undefined') ? DataStore.get('periods') : [];
+            
+            const badge = document.getElementById('activePeriodBadge');
+            
+            // אם אין נתונים או המערך ריק
+            if (!periods || periods.length === 0) {
+                console.warn('⚠️ אין תקופות במסד הנתונים כרגע.');
+                if (badge) {
+                    badge.textContent = '⚠️ לא הוגדרה תקופה';
+                    badge.style.background = '#fef2f2';
+                    badge.style.color = '#991b1b';
+                    badge.style.padding = '4px 8px';
+                    badge.style.borderRadius = '4px';
+                    badge.style.fontSize = '12px';
                 }
+                this.activePeriod = null;
+                return;
             }
-        }
 
-        return active;
-    }
+            // מציאת תקופה פעילה
+            const active = periods.find(p => (p.is_active == 1 || p.is_active === true)) || periods[0];
+            this.activePeriod = active;
+            
+            if (badge) {
+                badge.textContent = `📅 ${active.name_he || active.name || 'תקופה לא ידועה'}`;
+                badge.style.background = '#e0f2fe';
+                badge.style.color = '#0369a1';
+                badge.style.padding = '4px 8px';
+                badge.style.borderRadius = '4px';
+                badge.style.fontSize = '12px';
+            }
+            console.log('✅ תקופה פעילה:', this.activePeriod.name_he || this.activePeriod.name);
+            
+        } catch (error) {
+            console.error('❌ שגיאה קריטית בטעינת תקופה:', error);
+            // מונע מקריסה של שאר המערכת
+            this.activePeriod = null;
+        }
+    },
 
     function _getActivePeriodRange() {
         var p = AppContext.activePeriod;
@@ -10643,47 +10667,40 @@ function _saveCompleteData(solutionId) {
             });
             
             // שלב 3: טיפול מיוחד ב-users.json - שמירה על משתמש admin בלבד
-            try {
-                var usersData = localStorage.getItem('matspanet_users');
-                if (usersData) {
-                    try {
-                        var users = JSON.parse(usersData);
-                        var adminUser = users.find(function(u) { return u.username === 'admin'; });
-                        // אם אין admin, ניצור אחד ברירת מחדל
-                        if (!adminUser) {
-                            adminUser = {
-                                id: 'usr_admin_001',
-                                username: 'admin',
-                                password: 'admin123',
-                                fullName: 'מנהל מערכת',
-                                email: 'admin@matspanet.co.il',
-                                role: 'system_admin',
-                                isActive: true,
-                                createdAt: new Date().toISOString(),
-                                updatedAt: new Date().toISOString()
-                            };
-                        }
-                        // נשמור רק את ה-admin
-                        DataStore.saveAll('users', [adminUser]);
-                        totalDeleted += (users.length - 1); // נחסיר את ה-admin מהספירה
-                    } catch(e) {
-                        // אם יש שגיאה, נשמור admin ברירת מחדל
-                        DataStore.saveAll('users', [{
-                            id: 'usr_admin_001',
-                            username: 'admin',
-                            password: 'admin123',
-                            fullName: 'מנהל מערכת',
-                            email: 'admin@matspanet.co.il',
-                            role: 'system_admin',
-                            isActive: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        }]);
-                    }
-                }
-            } catch(e) {
-                // מתעלמים משגיאות בטיפול ב-users
-            }
+			async function handleLogin(username, password) {
+				const loginData = {
+					action: 'login',
+					username: username,
+					password: password
+				};
+
+				try {
+					const response = await fetch('api/auth.php', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify(loginData)
+					});
+
+					const result = await response.json();
+
+					if (result.success) {
+						// שמירת פרטי המשתמש ב-Session Storage או Local Storage
+						localStorage.setItem('currentUser', JSON.stringify(result.user));
+						localStorage.setItem('isLoggedIn', 'true');
+						
+						// הפניה ללוח הבקרה
+						window.location.href = 'dashboard.html';
+					} else {
+						// הצגת שגיאה למשתמש
+						alert(result.message);
+					}
+				} catch (error) {
+					console.error('שגיאת התחברות:', error);
+					alert('אירעה שגיאה בתקשורת עם השרת.');
+				}
+			}
             
             logActivity('clear_all', 'נקה הכל - נמחקו ' + totalDeleted + ' רשומות מ-' + (TABLES_TO_CLEAR.length + 1) + ' טבלאות', 'settings');
             showToast('הכל נמחק! ' + totalDeleted + ' רשומות נמחקו. משתמש admin נשמר. מרענן...', 'success');
