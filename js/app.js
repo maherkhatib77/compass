@@ -1282,7 +1282,7 @@ const App = (() => {
     }
 
 	// חפש את הפונקציה _loadActivePeriod ובצע בה את השינוי הבא:
-    _loadActivePeriod: function() {
+function _loadActivePeriod() {
         try {
             console.log('🔄 מנסה לטעון תקופה פעילה...');
             
