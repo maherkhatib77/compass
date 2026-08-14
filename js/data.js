@@ -86,6 +86,24 @@ const DataStore = {
                 this.data[tableName] = [];
             }
 
+            // If the users table came from an API that omits passwords (production DB hashes),
+            // prefer the developer local JSON fallback for offline login during localhost.
+            if (tableName === 'users' && Array.isArray(this.data[tableName]) && this.data[tableName].length) {
+                const first = this.data[tableName][0];
+                if (first && !Object.prototype.hasOwnProperty.call(first, 'password')) {
+                    console.warn("⚠️ API 'users' response lacks password field — attempting local JSON fallback for users (dev mode)");
+                    try {
+                        const fallbackRes = await fetch(`./data/users.json`);
+                        if (fallbackRes.ok) {
+                            this.data[tableName] = await fallbackRes.json();
+                            console.log(`💾 נטען גיבוי מ-JSON עבור 'users' (local dev).`);
+                        }
+                    } catch (e) {
+                        // keep API data if fallback fails
+                    }
+                }
+            }
+
             console.log(`📥 נטענה טבלה '${tableName}': ${this.data[tableName].length} רשומות.`);
             return this.data[tableName];
 
