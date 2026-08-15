@@ -204,18 +204,24 @@ const DataStore = {
                 if (payload && payload.id) {
                     urlToFetch = `${apiUrl}?table=${encodeURIComponent(tableName)}&id=${encodeURIComponent(payload.id)}`;
                     // some servers ignore body on DELETE; include minimal body anyway
-                    options.body = JSON.stringify({ id: payload.id });
+                    options.body = JSON.stringify({ id: payload.id, table: tableName });
                 } else {
                     options.body = JSON.stringify(dataWrapper);
                 }
+            } else if (method === 'PUT') {
+                // For update, prefer id in querystring for maximum compatibility and include data in body
+                if (payload && payload.id) {
+                    urlToFetch = `${apiUrl}?table=${encodeURIComponent(tableName)}&id=${encodeURIComponent(payload.id)}`;
+                }
+                options.body = JSON.stringify(dataWrapper);
             } else {
                 options.body = JSON.stringify(dataWrapper);
             }
 
             const response = await fetch(urlToFetch, options);
-            const result = await response.json();
+            const result = await response.json().catch(() => ({}));
 
-            // Accept either { success: true } or any 2xx response
+            // Consider both explicit success flag or any 2xx as success
             if ((result && result.success === true) || response.ok) {
                 console.log(`✅ נשמר בהצלחה ל-${tableName}`);
 
@@ -262,6 +268,7 @@ const DataStore = {
             return { success: false, error: error.message };
         }
     },
+
 
     async saveAll(key, records) {
         const safeRecords = Array.isArray(records) ? records : [];
@@ -335,36 +342,60 @@ const DataStore = {
                         if (idx !== -1) this.data[key][idx] = { ...this.data[key][idx], id: serverId };
                         console.log(`✅ Persisted new ${key} as id=${serverId}`);
                     }
+                } else {
+                    // server rejected creation — remove optimistic item
+                    const idx = this.data[key].findIndex(i => i && i.id === tempId);
+                    if (idx !== -1) this.data[key].splice(idx, 1);
+                    console.error(`❌ Server rejected create for ${key}:`, res && res.error ? res.error : res);
+                    try { alert('שגיאה ביצירת רשומה בשרת: ' + (res && res.error ? res.error : 'Unknown error')); } catch(e) {}
                 }
             } catch (e) {
+                // network or unexpected error - rollback optimistic add
+                const idx = this.data[key].findIndex(i => i && i.id === tempId);
+                if (idx !== -1) this.data[key].splice(idx, 1);
                 console.error('❌ Failed to persist create for', key, e);
+                try { alert('שגיאה ביצירת רשומה בשרת: ' + e.message); } catch(e) {}
             }
         })();
 
         return newItem;
     },
 
+
     remove(key, id) {
         if (!this.data[key]) return false;
-        const before = this.data[key].length;
-        this.data[key] = this.data[key].filter(item => item && item.id != id);
+        const beforeArr = (this.data[key] || []).slice();
+        const removed = this.data[key].filter(item => item && item.id != id);
+        this.data[key] = removed;
 
         // Background delete on server
         (async () => {
             try {
-                await this.save(key, 'delete', { id: id });
-                console.log(`✅ Deleted ${key} id=${id} on server`);
+                const res = await this.save(key, 'delete', { id: id });
+                if (res && res.success) {
+                    console.log(`✅ Deleted ${key} id=${id} on server`);
+                } else {
+                    // rollback
+                    this.data[key] = beforeArr;
+                    console.error(`❌ Server rejected delete for ${key} id=${id}:`, res && res.error ? res.error : res);
+                    try { alert('שגיאה במחיקת הרשומה בשרת: ' + (res && res.error ? res.error : 'Unknown error')); } catch(e) {}
+                }
             } catch (e) {
+                // network error - rollback
+                this.data[key] = beforeArr;
                 console.error('❌ Failed to persist delete for', key, id, e);
+                try { alert('שגיאה במחיקת הרשומה בשרת: ' + e.message); } catch(e) {}
             }
         })();
 
-        return this.data[key].length < before;
+        return true;
     },
+
 
     update(key, id, patch) {
         const item = this.getById(key, id);
         if (!item) return null;
+        const oldCopy = Object.assign({}, item);
         Object.assign(item, patch);
 
         // Background update on server
@@ -374,15 +405,26 @@ const DataStore = {
                 if (res && res.success && res.record) {
                     const idx = this.data[key].findIndex(i => i && i.id == id);
                     if (idx !== -1) this.data[key][idx] = { ...this.data[key][idx], ...res.record };
+                    console.log(`✅ Updated ${key} id=${id} on server`);
+                } else {
+                    // rollback optimistic change
+                    const idx = this.data[key].findIndex(i => i && i.id == id);
+                    if (idx !== -1) this.data[key][idx] = oldCopy;
+                    console.error(`❌ Server rejected update for ${key} id=${id}:`, res && res.error ? res.error : res);
+                    try { alert('שגיאה בעדכון הרשומה בשרת: ' + (res && res.error ? res.error : 'Unknown error')); } catch(e) {}
                 }
-                console.log(`✅ Updated ${key} id=${id} on server`);
             } catch (e) {
+                // rollback on error
+                const idx = this.data[key].findIndex(i => i && i.id == id);
+                if (idx !== -1) this.data[key][idx] = oldCopy;
                 console.error('❌ Failed to persist update for', key, id, e);
+                try { alert('שגיאה בעדכון הרשומה בשרת: ' + e.message); } catch(e) {}
             }
         })();
 
         return item;
     },
+
 
 
     getSettings() {
