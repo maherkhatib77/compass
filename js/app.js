@@ -1402,13 +1402,15 @@ function _loadActivePeriod() {
     }
 
     // ============ INITIALIZATION ============
-    function init() {
-        currentUser = Auth.requireAuth();
+    function init(allowAnonymous = false) {
+        currentUser = Auth.requireAuth(allowAnonymous);
         if (!currentUser) return;
         _initTableFeatures();
         _loadActivePeriod();
-        // רישום כניסה למערכת
-        logActivity('login', 'כניסה למערכת', 'system', currentUser.id);
+        // רישום כניסה למערכת (רק אם לא אנונימי)
+        if (currentUser.username !== 'anonymous') {
+            logActivity('login', 'כניסה למערכת', 'system', currentUser.id);
+        }
         renderSidebar();
         renderUserInfo();
         _renderActivePeriodBadge();
