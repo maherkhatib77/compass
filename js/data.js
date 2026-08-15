@@ -225,8 +225,9 @@ const DataStore = {
             if ((result && result.success === true) || response.ok) {
                 console.log(`✅ נשמר בהצלחה ל-${tableName}`, result);
 
-                // Treat zero affectedRows as failure for update/delete (no change persisted)
-                if ((method === 'PUT' || method === 'PATCH' || method === 'DELETE') && result && typeof result.affectedRows !== 'undefined' && Number(result.affectedRows) === 0) {
+                // For DELETE operations, treat zero affectedRows as failure
+                // For UPDATE, MySQL returns 0 when new values match existing values - this is still a success
+                if ((method === 'DELETE') && result && typeof result.affectedRows !== 'undefined' && Number(result.affectedRows) === 0) {
                     const errMsg = result && (result.error || result.message) ? (result.error || result.message) : 'No rows affected';
                     throw new Error(`Server reported 0 affected rows: ${errMsg}`);
                 }

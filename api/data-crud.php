@@ -206,26 +206,36 @@ try {
             $stmt->execute($params);
             $affected = $stmt->rowCount();
 
-            // Return updated row
+            // Return updated row - always fetch the current state regardless of affected rows
             $stmt = $pdo->prepare("SELECT * FROM `$table` WHERE id = :id LIMIT 1");
             $stmt->execute([':id' => $id]);
             $updated = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // For UPDATE, consider it successful even if affectedRows is 0
+            // (MySQL returns 0 when the new values match existing values)
             echo json_encode(['success' => true, 'id' => $id, 'affectedRows' => $affected, 'record' => $updated]);
             exit;
             break;
 
         case 'DELETE':
-            // Expect id in query
-            if (!isset($_GET['id'])) {
+            // Support single delete by id or bulk delete (all rows) by table
+            if (isset($_GET['id'])) {
+                // Single row delete
+                $id = (int) $_GET['id'];
+                $stmt = $pdo->prepare("DELETE FROM `$table` WHERE id = :id");
+                $stmt->execute([':id' => $id]);
+                $affected = $stmt->rowCount();
+                echo json_encode(['success' => true, 'id' => $id, 'affectedRows' => $affected]);
+            } elseif (isset($_GET['bulk']) && $_GET['bulk'] === 'true') {
+                // Bulk delete - remove all rows from the table
+                $stmt = $pdo->prepare("DELETE FROM `$table`");
+                $stmt->execute();
+                $affected = $stmt->rowCount();
+                echo json_encode(['success' => true, 'affectedRows' => $affected, 'message' => 'All rows deleted']);
+            } else {
                 http_response_code(400);
-                echo json_encode(['error' => 'Missing id for delete']);
-                exit;
+                echo json_encode(['error' => 'Missing id for delete or bulk flag']);
             }
-            $id = (int) $_GET['id'];
-            $stmt = $pdo->prepare("DELETE FROM `$table` WHERE id = :id");
-            $stmt->execute([':id' => $id]);
-            $affected = $stmt->rowCount();
-            echo json_encode(['success' => true, 'id' => $id, 'affectedRows' => $affected]);
             exit;
             break;
 
