@@ -149,15 +149,17 @@ try {
             // Expect id param either in query or in body
             $id = null;
             if (isset($_GET['id'])) $id = (int) $_GET['id'];
-            // If not in query, try body (we decoded it earlier to $body)
-            if (!$id && isset($body['id'])) $id = (int) $body['id'];
+            
+            $input = $body;
+            // If not in query, try body
+            if (!$id && $input && isset($input['id'])) $id = (int) $input['id'];
+            
             if (!$id) {
                 http_response_code(400);
                 echo json_encode(['error' => 'Missing id for update']);
                 exit;
             }
 
-            $input = $body;
             if (!$input || !isset($input['data']) || !is_array($input['data'])) {
                 http_response_code(400);
                 echo json_encode(['error' => 'Invalid request payload: missing data']);
