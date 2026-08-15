@@ -6,7 +6,14 @@
 
 // זיהוי אוטומטי של כתובת הבסיס based on current location
 // השימוש בנתיב יחסי ('/') מבטיח שהדפדפן ישלים את הכתובת הנכונה אוטומטית
-const API_BASE_URL = '/compass/api/';
+let baseDir = '';
+const pathParts = window.location.pathname.split('/').filter(p => p.length > 0);
+if (window.location.hostname === 'localhost' && pathParts.length > 0) {
+    // ב-localhost, השתמש בתיקייה הראשונה כ-basse directory (למשל /compass)
+    baseDir = '/' + pathParts[0];
+}
+
+const API_BASE_URL = baseDir + '/api/';
 
 // הגדרת שמות הקבצים לתאימות עם קבצי ה-PHP שיצרנו
 const API_ENDPOINTS = {
