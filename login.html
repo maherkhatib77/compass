@@ -313,9 +313,10 @@ button{font-family:inherit}
 <div class="toast" id="toast"></div>
 
 <!-- ספריות המערכת -->
-<script src="./config.js"></script>
-<script src="./js/data.js"></script>
-<script src="./js/auth.js"></script>
+<script src="js/config.js"></script>
+<script src="js/dev-creds.js"></script>
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
 <script>
 // המתנה לטעינת הדף
 document.addEventListener('DOMContentLoaded', async function() {
@@ -328,6 +329,14 @@ document.addEventListener('DOMContentLoaded', async function() {
         } catch (error) {
             console.error('[Login] Failed to initialize DataStore:', error);
         }
+    }
+    
+    // טעינת פרטי התחברות לפיתוח מקומי (אם קיימים)
+    if (window.__DEV_CREDS__ && window.__DEV_CREDS__.length > 0) {
+        const devUser = window.__DEV_CREDS__[0];
+        document.getElementById('username').value = devUser.user || '';
+        document.getElementById('password').value = devUser.pass || '';
+        console.log('[Login] Dev credentials auto-filled for local testing');
     }
     
     // אלמנטים בטופס

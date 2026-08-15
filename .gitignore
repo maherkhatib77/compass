@@ -1,9 +1,1 @@
-```
-# Compiled Python files
-*.pyc
-__pycache__/
-
-# Logs
-*.log
-server.log
-```
+Nothing should be ignored in this case, as the changes only include HTML source files (dashboard.html, index.html, login.html) without any build artifacts, dependencies, or temporary files.

@@ -60,12 +60,24 @@ async function initApiData() {
             
             if (usersRes.ok) {
                 const usersData = await usersRes.json();
+                const usersArray = usersData.data || usersData || [];
+                // In local dev (localhost), avoid overwriting local JSON users with API rows that omit password
                 if (typeof window.DataStore !== 'undefined' && typeof DataStore.set === 'function') {
-                    DataStore.set('users', usersData.data || usersData || []);
+                    if (window.location.hostname === 'localhost') {
+                        if (usersArray.length && Object.prototype.hasOwnProperty.call(usersArray[0], 'password')) {
+                            DataStore.set('users', usersArray);
+                        } else {
+                            // keep existing DataStore users if any (likely loaded from ./data/users.json), else set empty
+                            const existing = DataStore.getAll && DataStore.getAll('users') ? DataStore.getAll('users') : [];
+                            if (!existing || existing.length === 0) DataStore.set('users', []);
+                        }
+                    } else {
+                        DataStore.set('users', usersArray);
+                    }
                 } else if (window.users) {
-                    window.users = usersData.data || usersData || [];
+                    window.users = usersArray;
                 }
-                console.log(`✅ נטענו ${(usersData.data ? usersData.data.length : (Array.isArray(usersData) ? usersData.length : 0))} משתמשים`);
+                console.log(`✅ נטענו ${usersArray.length} משתמשים`);
             } else {
                 console.warn('⚠️ לא נטענו משתמשים (סטטוס ' + usersRes.status + ')');
                 if (typeof window.DataStore !== 'undefined' && typeof DataStore.set === 'function') DataStore.set('users', []);
