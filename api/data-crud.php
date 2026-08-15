@@ -18,7 +18,10 @@ $allowed_tables = [
     'users', 'categories', 'learning_solutions', 'solution_instructors',
     'inspectors', 'budgets', 'periods', 'registrations', 'system_settings',
     'faq_data', 'activity_log', 'catalog_entries', 'catalog_items',
-    'solution_comments', 'mentors', 'pedagogical_executors'
+    'solution_comments', 'mentors', 'pedagogical_executors',
+    'lookup_week_days', 'lookup_domains', 'lookup_meeting_types',
+    'lookup_budget_types', 'lookup_responsibility_types', 'lookup_education_stages',
+    'lookup_education_types', 'lookup_field_knowledge', 'lookup_role_holders'
 ];
 
 // Read raw input ONCE and decode for reuse (avoids php://input being drained)
