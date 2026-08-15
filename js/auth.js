@@ -222,12 +222,17 @@ const ROLE_LABELS = {
         return localStorage.getItem('matspanet_token');
     }
 
-    function requireAuth() {
-        if (!isAuthenticated()) {
+    function requireAuth(allowAnonymous = false) {
+        const user = getCurrentUser();
+        if (!user) {
+            if (allowAnonymous) {
+                // יצירת משתמש אנונימי לצורך גישה בסיסית
+                return { id: 0, username: 'anonymous', fullName: 'משתמש אורח', role: 'viewer', permissions: {} };
+            }
             window.location.href = './login.html';
-            return false;
+            return null;
         }
-        return true;
+        return user;
     }
 
     // ===== PERMISSION CHECKING =====

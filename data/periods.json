@@ -1,1 +1,24 @@
-[]
+[
+    {
+        "id": 1,
+        "name_he": "תשפ\"ה - מחזור א'",
+        "name_ar": "تشف هـ - الدورة أ",
+        "hebrew_year": "תשפ\"ה",
+        "english_year": 2025,
+        "start_date": "2024-09-01",
+        "end_date": "2025-08-31",
+        "is_active": true,
+        "order": 1
+    },
+    {
+        "id": 2,
+        "name_he": "תשפ\"ו - מחזור ב'",
+        "name_ar": "تشف و - الدورة ب",
+        "hebrew_year": "תשפ\"ו",
+        "english_year": 2026,
+        "start_date": "2025-09-01",
+        "end_date": "2026-08-31",
+        "is_active": false,
+        "order": 2
+    }
+]
