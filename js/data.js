@@ -319,9 +319,28 @@ const DataStore = {
 
     create(key, record) {
         if (!this.data[key]) this.data[key] = [];
-        const id = record.id || (Date.now() + Math.floor(Math.random()*1000));
-        const newItem = { ...record, id };
+        // Temporary client-side id until server assigns a real id
+        const tempId = record.id || ('tmp_' + Date.now() + '_' + Math.floor(Math.random()*1000));
+        const newItem = { ...record, id: tempId };
         this.data[key].push(newItem);
+
+        // Persist in background — do not block the UI. Update temp id if server provides real id.
+        (async () => {
+            try {
+                const res = await this.save(key, 'create', record);
+                if (res && res.success) {
+                    const serverId = res.id || (res.record && res.record.id) || null;
+                    if (serverId) {
+                        const idx = this.data[key].findIndex(i => i && i.id === tempId);
+                        if (idx !== -1) this.data[key][idx] = { ...this.data[key][idx], id: serverId };
+                        console.log(`✅ Persisted new ${key} as id=${serverId}`);
+                    }
+                }
+            } catch (e) {
+                console.error('❌ Failed to persist create for', key, e);
+            }
+        })();
+
         return newItem;
     },
 
@@ -329,6 +348,17 @@ const DataStore = {
         if (!this.data[key]) return false;
         const before = this.data[key].length;
         this.data[key] = this.data[key].filter(item => item && item.id != id);
+
+        // Background delete on server
+        (async () => {
+            try {
+                await this.save(key, 'delete', { id: id });
+                console.log(`✅ Deleted ${key} id=${id} on server`);
+            } catch (e) {
+                console.error('❌ Failed to persist delete for', key, id, e);
+            }
+        })();
+
         return this.data[key].length < before;
     },
 
@@ -336,8 +366,24 @@ const DataStore = {
         const item = this.getById(key, id);
         if (!item) return null;
         Object.assign(item, patch);
+
+        // Background update on server
+        (async () => {
+            try {
+                const res = await this.save(key, 'update', item);
+                if (res && res.success && res.record) {
+                    const idx = this.data[key].findIndex(i => i && i.id == id);
+                    if (idx !== -1) this.data[key][idx] = { ...this.data[key][idx], ...res.record };
+                }
+                console.log(`✅ Updated ${key} id=${id} on server`);
+            } catch (e) {
+                console.error('❌ Failed to persist update for', key, id, e);
+            }
+        })();
+
         return item;
     },
+
 
     getSettings() {
         return this.data['settings'] && Object.keys(this.data['settings']).length ? this.data['settings'] : (this.data['settings'] || {});
