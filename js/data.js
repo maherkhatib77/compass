@@ -223,7 +223,13 @@ const DataStore = {
 
             // Consider both explicit success flag or any 2xx as success
             if ((result && result.success === true) || response.ok) {
-                console.log(`✅ נשמר בהצלחה ל-${tableName}`);
+                console.log(`✅ נשמר בהצלחה ל-${tableName}`, result);
+
+                // Treat zero affectedRows as failure for update/delete (no change persisted)
+                if ((method === 'PUT' || method === 'PATCH' || method === 'DELETE') && result && typeof result.affectedRows !== 'undefined' && Number(result.affectedRows) === 0) {
+                    const errMsg = result && (result.error || result.message) ? (result.error || result.message) : 'No rows affected';
+                    throw new Error(`Server reported 0 affected rows: ${errMsg}`);
+                }
 
                 // Normalize created/updated return values from data-crud.php
                 if (action === 'create') {
