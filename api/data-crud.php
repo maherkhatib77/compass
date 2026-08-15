@@ -32,7 +32,8 @@ if (isset($_GET['table'])) {
 }
 
 // Basic validation of table name
-if (empty($table) || !in_array($table, $allowed_tables, true)) {
+$allowed_lookup_pattern = '/^lookup_[a-z0-9_]+$/';
+if (empty($table) || (!in_array($table, $allowed_tables, true) && !preg_match($allowed_lookup_pattern, $table))) {
     http_response_code(400);
     echo json_encode(['error' => 'Invalid or missing table name']);
     exit;
