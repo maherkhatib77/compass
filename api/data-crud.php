@@ -84,6 +84,35 @@ try {
             }
             $data = $input['data'];
 
+            // Normalize client keys for lookup_* tables so front-end can send { value,label,labelAr }
+            if (strpos($table, 'lookup_') === 0 && is_array($data)) {
+                $norm = [];
+                // primary code/value
+                if (isset($data['value'])) $norm['code'] = $data['value'];
+                if (isset($data['code'])) $norm['code'] = $data['code'];
+                // Hebrew label -> name_he
+                if (isset($data['label'])) $norm['name_he'] = $data['label'];
+                if (isset($data['label_he'])) $norm['name_he'] = $data['label_he'];
+                if (isset($data['name_he'])) $norm['name_he'] = $data['name_he'];
+                // Arabic label -> name_ar
+                if (isset($data['labelAr'])) $norm['name_ar'] = $data['labelAr'];
+                if (isset($data['label_ar'])) $norm['name_ar'] = $data['label_ar'];
+                if (isset($data['name_ar'])) $norm['name_ar'] = $data['name_ar'];
+                // isActive -> is_active
+                if (isset($data['isActive'])) $norm['is_active'] = $data['isActive'] ? 1 : 0;
+                if (isset($data['is_active'])) $norm['is_active'] = $data['is_active'] ? 1 : 0;
+                // order -> extra_data.sort_order (to avoid failing on schemas without an 'order' column)
+                if (isset($data['order'])) {
+                    $norm['extra_data'] = json_encode(['sort_order' => $data['order']]);
+                }
+                // carry through any other server-expected fields
+                foreach ($data as $k => $v) {
+                    if (in_array($k, ['value','label','labelAr','label_he','label_ar','order','isActive','is_active','code','name_he','name_ar'])) continue;
+                    $norm[$k] = $v;
+                }
+                $data = $norm;
+            }
+
             // Validate column names
             $columns = [];
             $placeholders = [];
@@ -140,6 +169,29 @@ try {
                 exit;
             }
             $data = $input['data'];
+
+            // Normalize client keys for lookup_* tables on update as well
+            if (strpos($table, 'lookup_') === 0 && is_array($data)) {
+                $norm = [];
+                if (isset($data['value'])) $norm['code'] = $data['value'];
+                if (isset($data['code'])) $norm['code'] = $data['code'];
+                if (isset($data['label'])) $norm['name_he'] = $data['label'];
+                if (isset($data['label_he'])) $norm['name_he'] = $data['label_he'];
+                if (isset($data['name_he'])) $norm['name_he'] = $data['name_he'];
+                if (isset($data['labelAr'])) $norm['name_ar'] = $data['labelAr'];
+                if (isset($data['label_ar'])) $norm['name_ar'] = $data['label_ar'];
+                if (isset($data['name_ar'])) $norm['name_ar'] = $data['name_ar'];
+                if (isset($data['isActive'])) $norm['is_active'] = $data['isActive'] ? 1 : 0;
+                if (isset($data['is_active'])) $norm['is_active'] = $data['is_active'] ? 1 : 0;
+                if (isset($data['order'])) {
+                    $norm['extra_data'] = json_encode(['sort_order' => $data['order']]);
+                }
+                foreach ($data as $k => $v) {
+                    if (in_array($k, ['value','label','labelAr','label_he','label_ar','order','isActive','is_active','code','name_he','name_ar'])) continue;
+                    $norm[$k] = $v;
+                }
+                $data = $norm;
+            }
 
             $sets = [];
             $params = [':id' => $id];
