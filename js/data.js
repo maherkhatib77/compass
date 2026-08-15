@@ -144,56 +144,125 @@ const DataStore = {
         return this.data[tableName] || [];
     },
 
-    async save(tableName, action, payload) {
-        const apiUrl = this.getApiUrl(tableName);
-        let method = 'POST';
-        let body = payload;
+    getCrudUrl(tableName) {
+        const path = window.location.pathname;
+        let baseDir = '';
+        if (path.includes('/compass/')) {
+            baseDir = '/compass';
+        } else if (path !== '/' && !path.endsWith('.html')) {
+            const parts = path.split('/').filter(p => p);
+            if (parts.length > 0 && window.location.hostname === 'localhost') {
+                baseDir = '/' + parts[0];
+            }
+        }
+        return `${baseDir}/api/data-crud.php`;
+    },
 
+    async save(tableName, action, payload) {
+        // Use unified CRUD endpoint
+        const apiUrl = this.getCrudUrl(tableName);
+        let method = 'POST';
         if (action === 'update') method = 'PUT';
         if (action === 'delete') method = 'DELETE';
 
-        console.log(`📡 שולח בקשה ל-API: ${method} ${apiUrl}`, payload);
+        // Ensure payload is an object
+        const dataWrapper = { table: tableName, data: payload };
+
+        console.log(`📡 שולח בקשה ל-CRUD API: ${method} ${apiUrl}`, dataWrapper);
 
         try {
-            const options = {
-                method: method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            };
-
             let urlToFetch = apiUrl;
-            if (method === 'DELETE' && payload.id) {
-                urlToFetch = `${apiUrl}?id=${payload.id}`;
-                options.body = JSON.stringify({ id: payload.id });
+            const options = { method, headers: { 'Content-Type': 'application/json' } };
+
+            if (method === 'DELETE') {
+                // prefer query param for id on DELETE for compatibility
+                if (payload && payload.id) {
+                    urlToFetch = `${apiUrl}?table=${encodeURIComponent(tableName)}&id=${encodeURIComponent(payload.id)}`;
+                    // some servers ignore body on DELETE; include minimal body anyway
+                    options.body = JSON.stringify({ id: payload.id });
+                } else {
+                    options.body = JSON.stringify(dataWrapper);
+                }
+            } else {
+                options.body = JSON.stringify(dataWrapper);
             }
 
             const response = await fetch(urlToFetch, options);
             const result = await response.json();
 
-            if (result.status === 'success' || response.ok) {
+            // Accept either { success: true } or any 2xx response
+            if ((result && result.success === true) || response.ok) {
                 console.log(`✅ נשמר בהצלחה ל-${tableName}`);
-                
-                if (action === 'create' && result.id) {
-                    const newItem = { ...payload, id: result.id };
-                    this.data[tableName].push(newItem);
-                } else if (action === 'update') {
-                    const index = this.data[tableName].findIndex(item => item.id == payload.id);
-                    if (index !== -1) {
-                        this.data[tableName][index] = { ...this.data[tableName][index], ...payload };
+
+                // Normalize created/updated return values from data-crud.php
+                if (action === 'create') {
+                    const newId = result.id || (result.record && result.record.id) || null;
+                    if (newId) {
+                        const newItem = { ...payload, id: newId };
+                        if (!this.data[tableName]) this.data[tableName] = [];
+                        this.data[tableName].push(newItem);
+                        return { success: true, id: newId, record: newItem };
                     }
-                } else if (action === 'delete') {
-                    this.data[tableName] = this.data[tableName].filter(item => item.id != payload.id);
                 }
-                
+
+                if (action === 'update') {
+                    const id = payload && payload.id;
+                    if (id != null && this.data[tableName]) {
+                        const index = this.data[tableName].findIndex(item => item && (item.id == id));
+                        if (index !== -1) {
+                            this.data[tableName][index] = { ...this.data[tableName][index], ...payload };
+                        }
+                    }
+                    return { success: true, record: result.record || payload };
+                }
+
+                if (action === 'delete') {
+                    const id = payload && payload.id;
+                    if (id != null && this.data[tableName]) {
+                        this.data[tableName] = this.data[tableName].filter(item => item && item.id != id);
+                    }
+                    return { success: true, id: id };
+                }
+
+                // Fallback: return server result
                 return { success: true, data: result };
             } else {
-                throw new Error(result.error || 'שגיאה בשמירה');
+                const errMsg = (result && (result.error || result.message)) || `HTTP ${response.status}`;
+                throw new Error(errMsg);
             }
 
         } catch (error) {
             console.error(`❌ כשל בשמירה ל-${tableName}:`, error);
-            alert('שגיאה בשמירת הנתונים לשרת.\n' + error.message);
+            try { alert('שגיאה בשמירת הנתונים לשרת.\n' + error.message); } catch(e) {}
             return { success: false, error: error.message };
+        }
+    },
+
+    async saveAll(key, records) {
+        const safeRecords = Array.isArray(records) ? records : [];
+        this.data[key] = safeRecords;
+
+        try {
+            const path = (typeof window !== 'undefined' && window.location && window.location.pathname) ? window.location.pathname : '/';
+            const match = path.match(/^(?:\/[^\/]+)?/);
+            const baseDir = match && match[0] && match[0] !== '/' ? match[0] : '';
+            const saveUrl = `${baseDir}/api/data-save.php`;
+            const response = await fetch(saveUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename: `${key}.json`, data: safeRecords })
+            });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok || result.success !== true) {
+                throw new Error(result.error || `HTTP ${response.status}`);
+            }
+            return safeRecords;
+        } catch (error) {
+            try {
+                localStorage.setItem(`compass_data_${key}`, JSON.stringify(safeRecords));
+            } catch (e) {}
+            console.warn(`⚠️ saveAll failed for '${key}', kept in memory/local fallback:`, error);
+            return safeRecords;
         }
     },
 

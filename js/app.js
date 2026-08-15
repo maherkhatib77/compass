@@ -11130,5 +11130,11 @@ function _saveCompleteData(solutionId) {
     };
 })();
 
+try {
+    if (typeof window !== 'undefined') {
+        window.App = App;
+    }
+} catch (e) {}
+
 // App.init() is called from dashboard.html after DataStore.init() completes.
 // Do NOT auto-init here because DataStore.init() is now async.
