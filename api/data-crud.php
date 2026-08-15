@@ -21,13 +21,14 @@ $allowed_tables = [
     'solution_comments', 'mentors', 'pedagogical_executors'
 ];
 
+// Read raw input ONCE and decode for reuse (avoids php://input being drained)
+$rawInput = file_get_contents('php://input');
+$body = json_decode($rawInput, true);
+
 // Get table param (from query for GET/DELETE, from JSON body for POST/PUT if not present)
 if (isset($_GET['table'])) {
     $table = $_GET['table'];
 } else {
-    // Try reading body for table
-    $raw = file_get_contents('php://input');
-    $body = json_decode($raw, true);
     $table = isset($body['table']) ? $body['table'] : '';
 }
 
@@ -75,8 +76,7 @@ try {
             break;
 
         case 'POST':
-            $raw = file_get_contents('php://input');
-            $input = json_decode($raw, true);
+            $input = $body;
             if (!$input || !isset($input['data']) || !is_array($input['data'])) {
                 http_response_code(400);
                 echo json_encode(['error' => 'Invalid request payload: missing data']);
@@ -148,21 +148,15 @@ try {
             // Expect id param either in query or in body
             $id = null;
             if (isset($_GET['id'])) $id = (int) $_GET['id'];
-            if (!$id) {
-                $raw = file_get_contents('php://input');
-                $input = json_decode($raw, true);
-                if (isset($input['id'])) $id = (int) $input['id'];
-            }
+            // If not in query, try body (we decoded it earlier to $body)
+            if (!$id && isset($body['id'])) $id = (int) $body['id'];
             if (!$id) {
                 http_response_code(400);
                 echo json_encode(['error' => 'Missing id for update']);
                 exit;
             }
 
-            if (!isset($input)) {
-                $raw = file_get_contents('php://input');
-                $input = json_decode($raw, true);
-            }
+            $input = $body;
             if (!$input || !isset($input['data']) || !is_array($input['data'])) {
                 http_response_code(400);
                 echo json_encode(['error' => 'Invalid request payload: missing data']);
