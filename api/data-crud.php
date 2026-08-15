@@ -133,13 +133,14 @@ try {
             $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
             $lastId = $pdo->lastInsertId();
+            $affected = $stmt->rowCount();
 
             // Return created row
             $stmt = $pdo->prepare("SELECT * FROM `$table` WHERE id = :id LIMIT 1");
             $stmt->execute([':id' => $lastId]);
             $created = $stmt->fetch(PDO::FETCH_ASSOC);
             http_response_code(201);
-            echo json_encode(['success' => true, 'id' => $lastId, 'record' => $created]);
+            echo json_encode(['success' => true, 'id' => $lastId, 'affectedRows' => $affected, 'record' => $created]);
             exit;
             break;
 
@@ -203,12 +204,13 @@ try {
             $sql = "UPDATE `$table` SET " . implode(', ', $sets) . " WHERE id = :id";
             $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
+            $affected = $stmt->rowCount();
 
             // Return updated row
             $stmt = $pdo->prepare("SELECT * FROM `$table` WHERE id = :id LIMIT 1");
             $stmt->execute([':id' => $id]);
             $updated = $stmt->fetch(PDO::FETCH_ASSOC);
-            echo json_encode(['success' => true, 'id' => $id, 'record' => $updated]);
+            echo json_encode(['success' => true, 'id' => $id, 'affectedRows' => $affected, 'record' => $updated]);
             exit;
             break;
 
@@ -222,7 +224,8 @@ try {
             $id = (int) $_GET['id'];
             $stmt = $pdo->prepare("DELETE FROM `$table` WHERE id = :id");
             $stmt->execute([':id' => $id]);
-            echo json_encode(['success' => true, 'id' => $id]);
+            $affected = $stmt->rowCount();
+            echo json_encode(['success' => true, 'id' => $id, 'affectedRows' => $affected]);
             exit;
             break;
 
