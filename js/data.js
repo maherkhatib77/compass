@@ -25,13 +25,17 @@ const DataStore = {
         LOOKUP_EDUCATION_TYPES: 'lookup_education_types',
         LOOKUP_FIELD_KNOWLEDGE: 'lookup_field_knowledge',
         LOOKUP_ROLE_HOLDERS: 'lookup_role_holders',
+        LOOKUP_SCHOOLS: 'lookup_schools',
+        INSPECTORS: 'inspectors',
+        PEDAGOGICAL_EXECUTORS: 'pedagogical_executors',
         SOLUTION_INSTRUCTORS: 'solution_instructors',
         MENTORS: 'mentors',
         INSTITUTIONS: 'institutions',
         CUSTOM_PAGES: 'custom_pages',
         HOMEPAGE: 'homepage',
         SETTINGS: 'settings',
-        ACTIVITY_LOG: 'activity_log'
+        ACTIVITY_LOG: 'activity_log',
+        RECYCLE_BIN: 'recycle_bin'
     },
 
 
