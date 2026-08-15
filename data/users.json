@@ -1,35 +1,233 @@
 [
-  {
-    "id": "usr_admin_001",
-    "username": "admin",
-    "password": "admin",
-    "fullName": "מנהל מערכת",
-    "email": "admin@matspanet.co.il",
-    "role": "system_admin",
-    "isActive": true,
-    "createdAt": "2024-09-01T00:00:00.000Z",
-    "updatedAt": "2024-09-01T00:00:00.000Z"
-  },
-  {
-    "id": "usr_guide1_001",
-    "username": "guide1",
-    "password": "guide123",
-    "fullName": "רחל כהן",
-    "email": "rachel@education.gov.il",
-    "role": "guide",
-    "isActive": true,
-    "createdAt": "2024-09-01T00:00:00.000Z",
-    "updatedAt": "2024-09-01T00:00:00.000Z"
-  },
-  {
-    "id": "usr_guide2_001",
-    "username": "guide2",
-    "password": "guide123",
-    "fullName": "דוד לוי",
-    "email": "david@education.gov.il",
-    "role": "guide",
-    "isActive": true,
-    "createdAt": "2024-09-01T00:00:00.000Z",
-    "updatedAt": "2024-09-01T00:00:00.000Z"
-  }
+    {
+        "id": "usr_admin_001",
+        "username": "admin",
+        "password": "admin123",
+        "fullName": "מנהל מערכת",
+        "email": "admin@matspanet.co.il",
+        "role": "system_admin",
+        "isActive": true,
+        "createdAt": "2024-09-01T00:00:00.000Z",
+        "updatedAt": "2024-09-01T00:00:00.000Z"
+    },
+    {
+        "fullName": "אבו שאח הדיל",
+        "username": "305397515",
+        "password": "12345",
+        "email": "a@gmail.com",
+        "role": "מפעיל מערכת",
+        "isActive": true,
+        "id": "msjy8uj2dlab656sj",
+        "createdAt": "2026-08-08T05:44:52.622Z",
+        "updatedAt": "2026-08-08T05:44:52.622Z"
+    },
+    {
+        "fullName": "אדריס רנא",
+        "username": "34685107",
+        "password": "12345",
+        "email": "a@gmail.com",
+        "role": "מדריך פסג\"ה",
+        "isActive": true,
+        "id": "msjy8uj3oxdkckquf",
+        "createdAt": "2026-08-08T05:44:52.623Z",
+        "updatedAt": "2026-08-08T05:44:52.623Z"
+    },
+    {
+        "fullName": "איבראהים מנאל",
+        "username": "21395892",
+        "password": "12345",
+        "email": "a@gmail.com",
+        "role": "מדריך פסג\"ה",
+        "isActive": true,
+        "id": "msjy8uj3m31mfy1f7",
+        "createdAt": "2026-08-08T05:44:52.623Z",
+        "updatedAt": "2026-08-08T05:44:52.623Z"
+    },
+    {
+        "fullName": "איבראהים נסרין",
+        "username": "43435734",
+        "password": "12345",
+        "email": "a@gmail.com",
+        "role": "מדריך פסג\"ה",
+        "isActive": true,
+        "id": "msjy8uj327i9o2e37",
+        "createdAt": "2026-08-08T05:44:52.623Z",
+        "updatedAt": "2026-08-08T05:44:52.623Z"
+    },
+    {
+        "fullName": "בדואן לינדה",
+        "username": "21975388",
+        "password": "12345",
+        "email": "a@gmail.com",
+        "role": "מדריך פסג\"ה",
+        "isActive": true,
+        "id": "msjy8uj3xnyr827g1",
+        "createdAt": "2026-08-08T05:44:52.623Z",
+        "updatedAt": "2026-08-08T05:44:52.623Z"
+    },
+    {
+        "fullName": "בזבז מחמוד",
+        "username": "302950597",
+        "password": "12345",
+        "email": "a@gmail.com",
+        "role": "מדריך פסג\"ה",
+        "isActive": true,
+        "id": "msjy8uj4mf6rcbati",
+        "createdAt": "2026-08-08T05:44:52.624Z",
+        "updatedAt": "2026-08-08T05:44:52.624Z"
+    },
+    {
+        "fullName": "ברהום אימאן",
+        "username": "39279682",
+        "password": "12345",
+        "email": "a@gmail.com",
+        "role": "חבר בצוות מוביל",
+        "isActive": true,
+        "id": "msjy8uj4w0uqo54dh",
+        "createdAt": "2026-08-08T05:44:52.624Z",
+        "updatedAt": "2026-08-08T05:44:52.624Z"
+    },
+    {
+        "fullName": "דבאח מרואה",
+        "username": "66607326",
+        "password": "12345",
+        "email": "a@gmail.com",
+        "role": "מדריך פסג\"ה",
+        "isActive": true,
+        "id": "msjy8uj4184hv6mif",
+        "createdAt": "2026-08-08T05:44:52.624Z",
+        "updatedAt": "2026-08-08T05:44:52.624Z"
+    },
+    {
+        "fullName": "דואבשה דלאל",
+        "username": "40759722",
+        "password": "12345",
+        "email": "a@gmail.com",
+        "role": "מדריך פסג\"ה",
+        "isActive": true,
+        "id": "msjy8uj4kvg3zu049",
+        "createdAt": "2026-08-08T05:44:52.624Z",
+        "updatedAt": "2026-08-08T05:44:52.624Z"
+    },
+    {
+        "fullName": "דעיס אלאא",
+        "username": "200726586",
+        "password": "12345",
+        "email": "a@gmail.com",
+        "role": "מדריך פסג\"ה",
+        "isActive": true,
+        "id": "msjy8uj4pbj4kyf80",
+        "createdAt": "2026-08-08T05:44:52.624Z",
+        "updatedAt": "2026-08-08T05:44:52.624Z"
+    },
+    {
+        "fullName": "דקידק איאד",
+        "username": "26406546",
+        "password": "12345",
+        "email": "a@gmail.com",
+        "role": "מדריך פסג\"ה",
+        "isActive": true,
+        "id": "msjy8uj543me72uku",
+        "createdAt": "2026-08-08T05:44:52.625Z",
+        "updatedAt": "2026-08-08T05:44:52.625Z"
+    },
+    {
+        "fullName": "וערי מוראד",
+        "username": "201598380",
+        "password": "12345",
+        "email": "a@gmail.com",
+        "role": "מדריך פסג\"ה",
+        "isActive": true,
+        "id": "msjy8uj5iohdkkit6",
+        "createdAt": "2026-08-08T05:44:52.625Z",
+        "updatedAt": "2026-08-08T05:44:52.625Z"
+    },
+    {
+        "fullName": "ח'טיב מאהר",
+        "username": "33619198",
+        "password": "12345",
+        "email": "a@gmail.com",
+        "role": "מנהל מערכת",
+        "isActive": true,
+        "id": "msjy8uj5c6sa1fgdh",
+        "createdAt": "2026-08-08T05:44:52.625Z",
+        "updatedAt": "2026-08-08T05:44:52.625Z"
+    },
+    {
+        "fullName": "חג'אזי יוסף",
+        "username": "37494010",
+        "password": "12345",
+        "email": "a@gmail.com",
+        "role": "מדריך פסג\"ה",
+        "isActive": true,
+        "id": "msjy8uj5wbnemrmn5",
+        "createdAt": "2026-08-08T05:44:52.625Z",
+        "updatedAt": "2026-08-08T05:44:52.625Z"
+    },
+    {
+        "fullName": "חוסין מוחמד",
+        "username": "34711242",
+        "password": "12345",
+        "email": "a@gmail.com",
+        "role": "מדריך פסג\"ה",
+        "isActive": true,
+        "id": "msjy8uj6u3bek1irl",
+        "createdAt": "2026-08-08T05:44:52.626Z",
+        "updatedAt": "2026-08-08T05:44:52.626Z"
+    },
+    {
+        "fullName": "חלאק שאדן",
+        "username": "35662154",
+        "password": "12345",
+        "email": "a@gmail.com",
+        "role": "מדריך פסג\"ה",
+        "isActive": true,
+        "id": "msjy8uj6eerw4tae7",
+        "createdAt": "2026-08-08T05:44:52.626Z",
+        "updatedAt": "2026-08-08T05:44:52.626Z"
+    },
+    {
+        "fullName": "מסאלחה דימא",
+        "username": "33516097",
+        "password": "12345",
+        "email": "a@gmail.com",
+        "role": "מדריך פסג\"ה",
+        "isActive": true,
+        "id": "msjy8uj69uhqsol55",
+        "createdAt": "2026-08-08T05:44:52.626Z",
+        "updatedAt": "2026-08-08T05:44:52.626Z"
+    },
+    {
+        "fullName": "נשאשיבי אינאס",
+        "username": "301712980",
+        "password": "12345",
+        "email": "a@gmail.com",
+        "role": "מדריך פסג\"ה",
+        "isActive": true,
+        "id": "msjy8uj6zs7k450xe",
+        "createdAt": "2026-08-08T05:44:52.626Z",
+        "updatedAt": "2026-08-08T05:44:52.626Z"
+    },
+    {
+        "fullName": "סבאג מתא הבה",
+        "username": "300259827",
+        "password": "12345",
+        "email": "a@gmail.com",
+        "role": "מדריך פסג\"ה",
+        "isActive": true,
+        "id": "msjy8uj7lt96gwkvp",
+        "createdAt": "2026-08-08T05:44:52.627Z",
+        "updatedAt": "2026-08-08T05:44:52.627Z"
+    },
+    {
+        "fullName": "סולימאן נבין",
+        "username": "304910847",
+        "password": "12345",
+        "email": "a@gmail.com",
+        "role": "מדריך פסג\"ה",
+        "isActive": true,
+        "id": "msjy8uj73izvpwv1i",
+        "createdAt": "2026-08-08T05:44:52.627Z",
+        "updatedAt": "2026-08-08T05:44:52.627Z"
+    }
 ]
