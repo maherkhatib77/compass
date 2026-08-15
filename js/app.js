@@ -6668,10 +6668,29 @@ function _saveCompleteData(solutionId) {
         const items = DataStore.getAll(_currentLookupKey) || [];
         if (!items.length) { showToast('אין רשומות למחיקה', 'info'); return; }
         const label = _currentLookupTableLabel || 'הטבלה';
-        confirmDialog('למחוק את כל ' + items.length + ' הרשומות של "' + label + '"?\nפעולה זו אינה הפיכה.', function() {
-            DataStore.saveAll(_currentLookupKey, []);
-            showToast(items.length + ' רשומות נמחקו בהצלחה', 'success');
-            renderLookupTables();
+        confirmDialog('למחוק את כל ' + items.length + ' הרשומות של "' + label + '"?\nפעולה זו אינה הפיכה.', async function() {
+            // Use CRUD API for bulk delete instead of saveAll (which writes to JSON)
+            try {
+                const crudUrl = DataStore.getCrudUrl(_currentLookupKey);
+                const urlWithParams = `${crudUrl}?table=${encodeURIComponent(_currentLookupKey)}&bulk=true`;
+                const response = await fetch(urlWithParams, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ table: _currentLookupKey, bulk: true })
+                });
+                const result = await response.json();
+                if (result && result.success === true) {
+                    // Clear local data
+                    DataStore.data[_currentLookupKey] = [];
+                    showToast(items.length + ' רשומות נמחקו בהצלחה', 'success');
+                    renderLookupTables();
+                } else {
+                    throw new Error(result && result.error ? result.error : 'Bulk delete failed');
+                }
+            } catch (error) {
+                console.error('❌ Bulk delete failed:', error);
+                showToast('שגיאה במחיקה הגורפת: ' + error.message, 'error');
+            }
         });
     }
 
