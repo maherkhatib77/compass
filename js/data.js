@@ -86,6 +86,31 @@ const DataStore = {
                 this.data[tableName] = [];
             }
 
+            // Normalize lookup tables (DB rows) into a uniform client-friendly shape
+            // so client helpers can rely on .value / .label / .labelAr fields.
+            if (tableName && tableName.startsWith('lookup_') && Array.isArray(this.data[tableName])) {
+                this.data[tableName] = this.data[tableName].map(row => {
+                    const value = row.code ?? row.value ?? row.id ?? row.name_he ?? '';
+                    const label = row.name_he ?? row.label ?? row.name ?? row.nameHe ?? '';
+                    const labelAr = row.name_ar ?? row.label_ar ?? row.labelAr ?? '';
+                    let order = row.order ?? null;
+                    if ((order === null || order === undefined) && row.extra_data) {
+                        try {
+                            const ex = (typeof row.extra_data === 'string') ? JSON.parse(row.extra_data) : row.extra_data;
+                            if (ex && (ex.sort_order || ex.order)) order = ex.sort_order || ex.order;
+                        } catch (e) { /* ignore parse errors */ }
+                    }
+                    const isActive = (row.is_active === undefined || row.is_active === null) ? true : (row.is_active != 0 && row.is_active !== '0');
+                    return Object.assign({}, row, {
+                        value: value,
+                        label: label,
+                        labelAr: labelAr,
+                        order: order,
+                        isActive: isActive
+                    });
+                });
+            }
+
             // If the users table came from an API that omits passwords (production DB hashes),
             // prefer the developer local JSON fallback for offline login during localhost.
             if (tableName === 'users' && Array.isArray(this.data[tableName]) && this.data[tableName].length) {
