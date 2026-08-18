@@ -1,6 +1,7 @@
 <?php
 /**
-* API Endpoint — sessions
+* API Endpoint — institutions (בתי ספר / מוסדות)
+* משתמש ב-config-manager.php להגדרות גמישות בין סביבות
 */
 require_once __DIR__ . '/../config-manager.php';
 setCorsHeaders();
@@ -11,11 +12,12 @@ try {
     $conn = new PDO($dsn, $config['username'], $config['password']);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    $stmt = $conn->query("SELECT * FROM sessions ORDER BY id ASC");
+    // הטבלה במסד נקראת lookup_schools
+    $stmt = $conn->query("SELECT * FROM lookup_schools ORDER BY id ASC");
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
     echo json_encode($results);
 } catch(PDOException $e) {
-    // אם הטבלה לא קיימת — החזר מערך ריק במקום שגיאת 500
+    // אם הטבלה לא קיימת — החזר מערך ריק
     if (strpos($e->getMessage(), 'doesn\'t exist') !== false || 
         strpos($e->getMessage(), '1146') !== false) {
         echo json_encode([]);

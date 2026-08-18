@@ -1,6 +1,6 @@
 <?php
 /**
-* API Endpoint - סטטוס הקצאה (lookup_allocation_status)
+* API Endpoint - נושאים רחבים (lookup_broad_topics)
 * משתמש ב-config-manager.php להגדרות גמישות בין סביבות
 * מוסיף מיפוי שמות מ-snake_case ל-camelCase עבור התאמה ל-Frontend
 */
@@ -18,8 +18,8 @@ try {
     $conn = new PDO($dsn, $config['username'], $config['password']);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // שליפת סטטוסי ההקצאה מהטבלה lookup_allocation_status
-    $stmt = $conn->query("SELECT * FROM lookup_allocation_status ORDER BY id ASC");
+    // שליפת הנושאים הרחבים מהטבלה lookup_broad_topics
+    $stmt = $conn->query("SELECT * FROM lookup_broad_topics ORDER BY id ASC");
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // ✅ מיפוי שמות מ-snake_case ל-camelCase עבור התאמה ל-Frontend

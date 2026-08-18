@@ -1,168 +1,67 @@
 <?php
+/**
+* API Endpoint - ימי שבוע (lookup_week_days)
+* משתמש ב-config-manager.php להגדרות גמישות בין סביבות
+* מוסיף מיפוי שמות מ-snake_case ל-camelCase עבור התאמה ל-Frontend
+*/
+// טעינת הגדרות תצורה מרכזיות
+require_once __DIR__ . '/../config-manager.php';
+
+// הגדרת כותרות CORS
+setCorsHeaders();
 header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-
-// טיפול בבקשת OPTIONS (Pre-flight)
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
-}
-
-// הגדרות חיבור למסד הנתונים
-$host = 'localhost';
-$db   = 'ejpisgaorg_matspanet_main'; // שם מסד הנתונים שלך
-$user = 'root';      // משתמש ברירת מחדל של XAMPP
-$pass = '';          // סיסמה ריקה ברירת מחדל של XAMPP
-$charset = 'utf8mb4';
-
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-$options = [
-    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES   => false,
-];
 
 try {
-    $pdo = new PDO($dsn, $user, $pass, $options);
-} catch (\PDOException $e) {
-    http_response_code(500);
-    echo json_encode(['error' => 'שגיאת חיבור למסד הנתונים: ' . $e->getMessage()]);
-    exit;
-}
+    // קבלת הגדרות חיבור מה-config manager
+    $config = getDbConfig();
+    $dsn = getDsn();
+    $conn = new PDO($dsn, $config['username'], $config['password']);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-$tableName = 'lookup_week_days';
-$method = $_SERVER['REQUEST_METHOD'];
-
-try {
-    if ($method === 'GET') {
-        // --- קריאת נתונים ---
-        // סידור לפי ID אם אין עמודת מיון ייעודית, או לפי code אם קיים
-        $stmt = $pdo->query("SELECT * FROM $tableName ORDER BY id ASC");
-        $data = $stmt->fetchAll();
+    // שליפת ימי השבוע מהטבלה lookup_week_days
+    $stmt = $conn->query("SELECT * FROM lookup_week_days ORDER BY id ASC");
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // ✅ מיפוי שמות מ-snake_case ל-camelCase עבור התאמה ל-Frontend
+    $mapped = array_map(function($row) {
+        // חילוץ order מתוך extra_data (JSON)
+        $order = null;
+        if (!empty($row['extra_data'])) {
+            $extraData = is_string($row['extra_data']) 
+                ? json_decode($row['extra_data'], true) 
+                : $row['extra_data'];
+            if ($extraData && isset($extraData['sort_order'])) {
+                $order = $extraData['sort_order'];
+            } elseif ($extraData && isset($extraData['order'])) {
+                $order = $extraData['order'];
+            }
+        }
         
-        echo json_encode([
-            'status' => 'success',
-            'data' => $data,
-            'count' => count($data)
-        ]);
+        return [
+            'id'        => $row['id'],
+            'value'     => $row['code'] ?? '',
+            'label'     => $row['name_he'] ?? '',
+            'labelHe'   => $row['name_he'] ?? '',
+            'labelAr'   => $row['name_ar'] ?? '',
+            'order'     => $order,
+            'isActive'  => isset($row['is_active']) ? (bool)$row['is_active'] : true,
+            // שמירה על השדות המקוריים לתאימות
+            'code'      => $row['code'] ?? '',
+            'name_he'   => $row['name_he'] ?? '',
+            'name_ar'   => $row['name_ar'] ?? '',
+            'extra_data'=> $row['extra_data'] ?? null,
+            'is_active' => $row['is_active'] ?? 1
+        ];
+    }, $results);
+    
+    echo json_encode($mapped);
 
-    } elseif ($method === 'POST') {
-        // --- הוספת רשומה חדשה ---
-        $input = json_decode(file_get_contents('php://input'), true);
-
-        if (!$input) {
-            http_response_code(400);
-            echo json_encode(['error' => 'לא נשלחו נתונים תקינים']);
-            exit;
-        }
-
-        // מיפוי שדות מהטופס לשמות העמודות בטבלה
-        // וידוא שהשדות תואמים למה שביקשת: ערך, תווית עברית, תווית ערבית, סדר, פעיל
-        $name_he = $input['name_he'] ?? $input['label_he'] ?? ''; // תומך גם ב-name_he וגם ב-label_he
-        $name_ar = $input['name_ar'] ?? $input['label_ar'] ?? '';
-        $code    = $input['code'] ?? $input['value'] ?? '';       // תומך ב-code או value
-        $is_active = isset($input['is_active']) ? (int)$input['is_active'] : 1;
-        
-        // אם יש שדה sort_order נשמור אותו ב-extra_data כי אין עמודה כזו בטבלה
-        $extra_data = null;
-        if (isset($input['sort_order'])) {
-            $extra_data = json_encode(['sort_order' => $input['sort_order']]);
-        }
-
-        if (empty($name_he)) {
-            http_response_code(400);
-            echo json_encode(['error' => 'שדה שם בעברית הוא חובה']);
-            exit;
-        }
-
-        $sql = "INSERT INTO $tableName (name_he, name_ar, code, is_active, extra_data) VALUES (?, ?, ?, ?, ?)";
-        $stmt = $pdo->prepare($sql);
-        
-        $stmt->execute([
-            $name_he,
-            $name_ar,
-            $code,
-            $is_active,
-            $extra_data
-        ]);
-
-        echo json_encode([
-            'status' => 'success',
-            'message' => 'הרשומה נשמרה בהצלחה',
-            'id' => $pdo->lastInsertId()
-        ]);
-
-    } elseif ($method === 'PUT' || $method === 'PATCH') {
-        // --- עדכון רשומה קיימת ---
-        $input = json_decode(file_get_contents('php://input'), true);
-        $id = $input['id'] ?? 0;
-
-        if (!$id) {
-            http_response_code(400);
-            echo json_encode(['error' => 'חובה לציין ID לעדכון']);
-            exit;
-        }
-
-        $name_he = $input['name_he'] ?? $input['label_he'] ?? '';
-        $name_ar = $input['name_ar'] ?? $input['label_ar'] ?? '';
-        $code    = $input['code'] ?? $input['value'] ?? '';
-        $is_active = isset($input['is_active']) ? (int)$input['is_active'] : 1;
-        
-        $extra_data = null;
-        if (isset($input['sort_order'])) {
-            $extra_data = json_encode(['sort_order' => $input['sort_order']]);
-        }
-
-        $sql = "UPDATE $tableName SET name_he = ?, name_ar = ?, code = ?, is_active = ?, extra_data = ? WHERE id = ?";
-        $stmt = $pdo->prepare($sql);
-        
-        $stmt->execute([
-            $name_he,
-            $name_ar,
-            $code,
-            $is_active,
-            $extra_data,
-            $id
-        ]);
-
-        echo json_encode([
-            'status' => 'success',
-            'message' => 'הרשומה עודכנה בהצלחה'
-        ]);
-
-    } elseif ($method === 'DELETE') {
-        // --- מחיקת רשומה ---
-        // קריאת ה-ID מה-URL או מה-body
-        parse_str(file_get_contents('php://input'), $deleteData);
-        $id = $_GET['id'] ?? $deleteData['id'] ?? 0;
-
-        if (!$id) {
-            http_response_code(400);
-            echo json_encode(['error' => 'חובה לציין ID למחיקה']);
-            exit;
-        }
-
-        $sql = "DELETE FROM $tableName WHERE id = ?";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$id]);
-
-        echo json_encode([
-            'status' => 'success',
-            'message' => 'הרשומה נמחקה בהצלחה'
-        ]);
-
-    } else {
-        http_response_code(405);
-        echo json_encode(['error' => 'שיטה לא נתמכת']);
-    }
-
-} catch (\Exception $e) {
+} catch(PDOException $e) {
     http_response_code(500);
     echo json_encode([
-        'error' => 'שגיאה פנימית: ' . $e->getMessage(),
-        'trace' => $e->getTraceAsString() // רק לפיתוח, להסיר בפרודקשן
+        "error" => "שגיאת מסד נתונים",
+        "message" => $e->getMessage(),
+        "sql_state" => $e->getCode()
     ]);
 }
 ?>
