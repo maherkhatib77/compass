@@ -1021,9 +1021,9 @@ const App = (() => {
             if (mType === 'רגיל') { _regularSum += mTotal; }
             else if (mType === 'שעות ליווי') { _accSum += mTotal; }
         }
-        // Col 16: סה"כ שעות מתוקצבות = רגיל only
+        // Col 16: סה״כ שעות מתוקצבות = רגיל only
         var _totalBudgetedHours = _regularSum > 0 ? _regularSum : '';
-        // Col 23: סה"כ שעות מתוקצבות (שעות ליווי) = שעות ליווי only
+        // Col 23: סה״כ שעות מתוקצבות (שעות ליווי) = שעות ליווי only
         var _accBudgetedHours = _accSum > 0 ? _accSum : '';
 
         // Solution-level tail fields
@@ -1216,7 +1216,7 @@ const App = (() => {
                 showToast('יוצא בהצלחה', 'success');
                 return;
             } else if (type === 'mentors') {
-                data = items.map(m => ({ 'ת.ז. מרצה': m.idNumber || '', 'שם מרצה (עברית)': m.fullNameHe || m.fullName || '', 'שם מרצה (ערבית)': m.fullNameAr || '', 'טלפון נייד': m.phone || '', 'דוא"ל': m.email || '', 'מרצה מוסב': m.isCertifiedLecturer !== null ? (m.isCertifiedLecturer ? 'כן' : 'לא') : '', 'מומחה בתחומו': m.expertInField !== null ? (m.expertInField ? 'כן' : 'לא') : '', 'סטטוס': m.lecturerStatus || '' }));
+                data = items.map(m => ({ 'ת.ז. מרצה': m.idNumber || '', 'שם מרצה (עברית)': m.fullNameHe || '', 'שם מרצה (ערבית)': m.fullNameAr || '', 'טלפון נייד': m.phone || '', 'דוא"ל': m.email || '', 'מרצה מוסב': m.isCertifiedLecturer !== null ? (m.isCertifiedLecturer ? 'כן' : 'לא') : '', 'מומחה בתחומו': m.expertInField !== null ? (m.expertInField ? 'כן' : 'לא') : '', 'סטטוס': m.lecturerStatus || '' }));
                 sheetName = 'מרצים';
             } else if (type === 'guides_repo') {
                 data = items.map(g => ({ 'ת.ז.': g.idNumber || '', 'שם מלא (עברית)': g.fullNameHe || g.fullName || '', 'שם מלא (ערבית)': g.fullNameAr || '', 'תפקיד': g.position || '', 'טלפון': g.phone || '', 'דוא"ל': g.email || '', 'תחומי התמחות': g.specializations || '' }));
@@ -5505,12 +5505,13 @@ function clearAllMentors() {
     }
 
     // ================================================================
-    //  HOMEPAGE — דף שער
+    //  HOMEPAGE (דף שער)
     // ================================================================
     function renderHomepage() {
         const hp = DataStore.getHomepage();
         const container = document.getElementById('section-homepage');
         if (!container) return;
+
         // Destroy any existing TinyMCE editor before re-rendering
         if (typeof tinymce !== 'undefined' && _hpTinyMCEInit) {
             try {
@@ -5522,9 +5523,11 @@ function clearAllMentors() {
             } catch(e) { console.error('[Homepage] Error destroying editor on re-render:', e); }
             _hpTinyMCEInit = false;
         }
+
         container.innerHTML = `
             ${_lookupTableHeader('ניהול דף שער', 1)}
             <div style="display:flex;flex-direction:column;gap:24px;">
+
                 <!-- Card 1: Header Section -->
                 <div class="card">
                     <div class="card-header"><span class="card-title">🖼️ כותרת עליונה (לוגו + שם אתר)</span></div>
@@ -5551,6 +5554,7 @@ function clearAllMentors() {
                         </div>
                     </div>
                 </div>
+
                 <!-- Card 2: Navigation Bar -->
                 <div class="card">
                     <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
@@ -5561,6 +5565,7 @@ function clearAllMentors() {
                         ${_renderHomepageNavTable(hp)}
                     </div>
                 </div>
+
                 <!-- Card 3: Sidebar Items -->
                 <div class="card">
                     <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
@@ -5571,6 +5576,7 @@ function clearAllMentors() {
                         ${_renderHomepageSidebarTable(hp)}
                     </div>
                 </div>
+
                 <!-- Card 4: Main Content -->
                 <div class="card">
                     <div class="card-header"><span class="card-title">📝 תוכן מרכזי (עברי וערבי מאוחד)</span></div>
@@ -5589,7 +5595,27 @@ function clearAllMentors() {
                         </div>
                     </div>
                 </div>
+
+                <!-- Card 5: Footer -->
+                <div class="card">
+                    <div class="card-header"><span class="card-title">🔻 כותרת תחתונה (Footer)</span></div>
+                    <div class="card-body">
+                        <div style="display:flex;flex-direction:column;gap:12px;">
+                            <div>
+                                <label style="font-weight:600;margin-bottom:4px;display:block;">טקסט עברית</label>
+                                <textarea id="hpFooterHe" class="form-input" rows="2" placeholder="טקסט footer בעברית...">${escAttr(hp.footerText?.he || '')}</textarea>
+                            </div>
+                            <div>
+                                <label style="font-weight:600;margin-bottom:4px;display:block;">טקסט ערבית</label>
+                                <textarea id="hpFooterAr" class="form-input" rows="2" placeholder="نص التذييل بالعربية..." dir="rtl">${escAttr(hp.footerText?.ar || '')}</textarea>
+                            </div>
+                            <button class="btn btn-primary" onclick="App._saveHomepageFooter()" style="align-self:flex-start;">💾 שמור Footer</button>
+                        </div>
+                    </div>
+                </div>
+
             </div>
+
             <style>
                 @media (max-width: 768px) {
                     #mainContent [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
@@ -5597,6 +5623,7 @@ function clearAllMentors() {
             </style>
         `;
     }
+
 
     function _renderHomepageNavTable(hp) {
         const items = (hp.navItems || []).slice().sort((a, b) => (a.order || 0) - (b.order || 0));
@@ -5642,7 +5669,8 @@ function clearAllMentors() {
         if (newLogo) updates.logo = newLogo;
         DataStore.updateHomepage(updates);
         showToast('הכותרת נשמרה', 'success');
-        // לא קוראים ל-renderHomepage() מחדש כדי למנוע שכפול
+        // Re-render and re-initialize TinyMCE after a short delay
+        setTimeout(function() { renderHomepage(); _initHpTinyMCE(); }, 100);
     }
 
     var _hpTinyMCEInit = false;
@@ -5771,6 +5799,15 @@ function clearAllMentors() {
             mainContent: { combined: content, he: content, ar: content }
         });
         showToast('התוכן נשמר', 'success');
+    }
+
+    function _saveHomepageFooter() {
+        const footerHe = document.getElementById('hpFooterHe').value;
+        const footerAr = document.getElementById('hpFooterAr').value;
+        DataStore.updateHomepage({ footerText: { he: footerHe, ar: footerAr } });
+        showToast('ה-Footer נשמר', 'success');
+        // Re-render and re-initialize TinyMCE after a short delay
+        setTimeout(function() { renderHomepage(); _initHpTinyMCE(); }, 100);
     }
 
     function openHomepageNavModal(id) {
@@ -11085,7 +11122,7 @@ function _doClearAll() {
         // Guides Repo
         openGuideRepoModal, saveGuideRepo, deleteGuideRepo, clearAllGuidesRepo, filterGuidesRepo, _previewGuideImage, moveGuideRepo,
         // Homepage
-        renderHomepage, _saveHomepageHeader, _saveHomepageContent,
+        renderHomepage, _saveHomepageHeader, _saveHomepageContent, _saveHomepageFooter,
         openHomepageNavModal, saveHomepageNavItem, deleteHomepageNavItem, moveHomepageNavItem,
         openHomepageSidebarModal, saveHomepageSidebarItem, deleteHomepageSidebarItem, moveHomepageSidebarItem,
         _previewHomepageLogo,

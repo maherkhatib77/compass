@@ -16,15 +16,17 @@
  * ============================================================================
  */
 
+// global-ui.js
 const GlobalUI = (() => {
-
-    /**
-     * Apply settings to all known container elements on the page.
-     * Safe to call multiple times (e.g. after settings change).
-     */
-    function apply(currentLang) {
-        const settings = DataStore.getSettings();
-        const lang = currentLang || 'ar'; // default Arabic for public pages
+ function apply(currentLang) {
+     // 🛡️ Guard: ensure DataStore is loaded before accessing it
+     if (typeof DataStore === 'undefined' || typeof DataStore.getSettings !== 'function') {
+         console.warn('[GlobalUI] DataStore is not defined or not ready yet. Skipping UI apply.');
+         return;
+     }
+     
+     const settings = DataStore.getSettings();
+     const lang = currentLang || 'ar'; // default Arabic for public pages
 
         // Logo
         const logoEl = document.getElementById('globalHeaderLogo');
