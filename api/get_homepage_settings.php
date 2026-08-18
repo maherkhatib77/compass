@@ -6,9 +6,6 @@
 *
 * פורמט פלט:
 * {
-*   "logo": "",
-*   "siteName": {"he": "...", "ar": "..."},
-*   "footerText": {"he": "...", "ar": "..."},
 *   "mainContent": {"combined": "...", "he": "...", "ar": "..."},
 *   "navItems": [...],
 *   "sidebarItems": [...]
@@ -30,9 +27,6 @@ try {
 
     // בניית אובייקט שטוח מהמקטעים
     $flat = [
-        'logo'         => '',
-        'siteName'     => ['he' => '', 'ar' => ''],
-        'footerText'   => ['he' => '', 'ar' => ''],
         'mainContent'  => ['combined' => '', 'he' => '', 'ar' => ''],
         'navItems'     => [],
         'sidebarItems' => []
@@ -51,12 +45,6 @@ try {
         if ($content === null) continue;
 
         switch ($key) {
-            case 'site_info':
-                if (isset($content['logo']))       $flat['logo']       = $content['logo'];
-                if (isset($content['siteName']))   $flat['siteName']   = $content['siteName'];
-                if (isset($content['footerText'])) $flat['footerText'] = $content['footerText'];
-                break;
-
             case 'main_content':
                 $flat['mainContent'] = $content;
                 break;

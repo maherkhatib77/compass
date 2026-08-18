@@ -5539,33 +5539,7 @@ function clearAllMentors() {
         container.innerHTML = `
             ${_lookupTableHeader('ניהול דף שער', 1)}
             <div style="display:flex;flex-direction:column;gap:24px;">
-                <!-- Card 1: Header Section -->
-                <div class="card">
-                    <div class="card-header"><span class="card-title">🖼️ כותרת עליונה (לוגו + שם אתר)</span></div>
-                    <div class="card-body">
-                        <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
-                            <div style="text-align:center;">
-                                <div id="hpLogoPreview" style="width:100px;height:100px;border-radius:12px;border:2px dashed var(--border-color);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:#f8f9fa;" onclick="document.getElementById('hpLogoInput').click()">
-                                    ${hp.logo ? `<img src="${hp.logo}" style="width:100%;height:100%;object-fit:cover;">` : '<span style="font-size:40px;">🧭</span>'}
-                                </div>
-                                <input type="file" id="hpLogoInput" accept="image/*" style="display:none;" onchange="App._previewHomepageLogo(this)">
-                                <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">לחץ להעלאה</div>
-                            </div>
-                            <div style="flex:1;min-width:250px;display:flex;flex-direction:column;gap:12px;">
-                                <div>
-                                    <label style="font-weight:600;margin-bottom:4px;display:block;">שם האתר (עברית)</label>
-                                    <input type="text" id="hpSiteNameHe" class="form-input" value="${escAttr(hp.siteName?.he || '')}" placeholder="שם האתר בעברית">
-                                </div>
-                                <div>
-                                    <label style="font-weight:600;margin-bottom:4px;display:block;">שם האתר (ערבית)</label>
-                                    <input type="text" id="hpSiteNameAr" class="form-input" value="${escAttr(hp.siteName?.ar || '')}" placeholder="اسم الموقع بالعربية" dir="rtl">
-                                </div>
-                                <button class="btn btn-primary" onclick="App._saveHomepageHeader()" style="align-self:flex-start;">💾 שמור כותרת</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Card 2: Navigation Bar -->
+                <!-- Card 1: Navigation Bar -->
                 <div class="card">
                     <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
                         <span class="card-title">🧭 סרגל ניווט</span>
@@ -5575,7 +5549,7 @@ function clearAllMentors() {
                         ${_renderHomepageNavTable(hp)}
                     </div>
                 </div>
-                <!-- Card 3: Sidebar Items -->
+                <!-- Card 2: Sidebar Items -->
                 <div class="card">
                     <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
                         <span class="card-title">📌 תוכן צדדי (Sidebar)</span>
@@ -5585,7 +5559,7 @@ function clearAllMentors() {
                         ${_renderHomepageSidebarTable(hp)}
                     </div>
                 </div>
-                <!-- Card 4: Main Content -->
+                <!-- Card 3: Main Content -->
                 <div class="card">
                     <div class="card-header"><span class="card-title">📝 תוכן מרכזי (עברי וערבי מאוחד)</span></div>
                     <div class="card-body">
@@ -5645,18 +5619,6 @@ function clearAllMentors() {
             </tr></thead>
             <tbody>${rows}</tbody>
         </table>`;
-    }
-
-    function _saveHomepageHeader() {
-        const nameHe = document.getElementById('hpSiteNameHe').value.trim();
-        const nameAr = document.getElementById('hpSiteNameAr').value.trim();
-        const logoInput = document.getElementById('hpLogoInput');
-        const newLogo = logoInput && logoInput.dataset.imagedata ? logoInput.dataset.imagedata : null;
-        const updates = { siteName: { he: nameHe, ar: nameAr } };
-        if (newLogo) updates.logo = newLogo;
-        DataStore.updateHomepage(updates);
-        showToast('הכותרת נשמרה', 'success');
-        // לא קוראים ל-renderHomepage() מחדש כדי למנוע שכפול
     }
 
     var _hpTinyMCEInit = false;
@@ -6004,33 +5966,6 @@ function clearAllMentors() {
         DataStore.updateHomepage({ sidebarItems: items });
         // Re-render and re-initialize TinyMCE after a short delay
         setTimeout(function() { renderHomepage(); _initHpTinyMCE(); }, 100);
-    }
-
-    function _previewHomepageLogo(input) {
-        if (!input.files || !input.files[0]) return;
-        const file = input.files[0];
-        if (file.size > 2 * 1024 * 1024) { showToast('גודל קובץ מקסימלי: 2MB', 'error'); return; }
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                const maxSize = 200;
-                let w = img.width, h = img.height;
-                if (w > maxSize || h > maxSize) {
-                    if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
-                    else { w = Math.round(w * maxSize / h); h = maxSize; }
-                }
-                canvas.width = w; canvas.height = h;
-                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                const preview = document.getElementById('hpLogoPreview');
-                if (preview) preview.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;">`;
-                input.dataset.imagedata = dataUrl;
-            };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
     }
 
     // ================================================================
@@ -9877,20 +9812,8 @@ function clearAllMentors() {
                 '<div class="card-header"><span class="card-title">🌐 כותרת אתר וזכויות יוצרים</span></div>' +
                 '<div class="card-body">' +
                     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">' +
-                        '<div class="form-group"><label>שם האתר – עברית</label><input type="text" id="fSiteNameHe" class="form-input" value="' + escAttr(settings.siteNameHe || '') + '" dir="rtl"></div>' +
-                        '<div class="form-group"><label>اسم الموقع – بالعربية</label><input type="text" id="fSiteNameAr" class="form-input" value="' + escAttr(settings.siteNameAr || '') + '" dir="rtl"></div>' +
                         '<div class="form-group"><label>טקסט זכויות יוצרים – עברית</label><input type="text" id="fCopyrightHe" class="form-input" value="' + escAttr(settings.copyrightHe || '') + '" dir="rtl"></div>' +
                         '<div class="form-group"><label>نص حقوق النشر – بالعربية</label><input type="text" id="fCopyrightAr" class="form-input" value="' + escAttr(settings.copyrightAr || '') + '" dir="rtl"></div>' +
-                    '</div>' +
-                    '<div class="form-group">' +
-                        '<label>לוגו האתר</label>' +
-                        '<div style="display:flex;align-items:center;gap:10px;margin-top:6px;">' +
-                            '<input type="file" id="fLogoFile" accept="image/*" style="font-size:13px;">' +
-                            '<div id="fLogoPreview" style="width:40px;height:40px;border-radius:8px;border:2px solid var(--gray-200);display:flex;align-items:center;justify-content:center;font-size:24px;overflow:hidden;flex-shrink:0;background:var(--gray-50);">' + (settings.logoUrl ? '<img src="'+settings.logoUrl+'" style="width:100%;height:100%;object-fit:cover;">' : '🧭') + '</div>' +
-                        '</div>' +
-                    '</div>' +
-                    '<div style="display:flex;justify-content:flex-start;margin-top:8px;">' +
-                        '<button class="btn btn-primary" onclick="App.saveSiteSettings()">💾 שמור שינויים</button>' +
                     '</div>' +
                 '</div>' +
             '</div>' +
@@ -11099,10 +11022,9 @@ function _doClearAll() {
         // Guides Repo
         openGuideRepoModal, saveGuideRepo, deleteGuideRepo, clearAllGuidesRepo, filterGuidesRepo, _previewGuideImage, moveGuideRepo,
         // Homepage
-        renderHomepage, _saveHomepageHeader, _saveHomepageContent,
+        renderHomepage, _saveHomepageContent,
         openHomepageNavModal, saveHomepageNavItem, deleteHomepageNavItem, moveHomepageNavItem,
         openHomepageSidebarModal, saveHomepageSidebarItem, deleteHomepageSidebarItem, moveHomepageSidebarItem,
-        _previewHomepageLogo,
         // Budgets
         openBudgetModal, saveBudget, deleteBudget, deleteAllBudgets, filterBudgets, _onBHebYear,
         // Periods
