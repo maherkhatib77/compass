@@ -1414,7 +1414,21 @@ function _loadActivePeriod() {
         renderSidebar();
         renderUserInfo();
         _renderActivePeriodBadge();
-        showSection('dashboard');
+        
+        // טעינת נתוני API לפני הצגת הדשבורד
+        if (typeof initApiData === 'function') {
+            console.log('[App.init] 🔄 טוען נתוני API...');
+            initApiData().then(() => {
+                console.log('[App.init] ✅ נתוני API נטענו, מציג דשבורד...');
+                showSection('dashboard');
+            }).catch(err => {
+                console.warn('[App.init] ⚠️ שגיאה בטעינת API:', err);
+                showSection('dashboard');
+            });
+        } else {
+            showSection('dashboard');
+        }
+        
         setupEventListeners();
     }
 
