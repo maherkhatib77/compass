@@ -541,11 +541,6 @@ updateHomepage(updates) {
     (async () => {
         try {
             const sections = {
-                'site_info': {
-                    logo: updated.logo || '',
-                    siteName: updated.siteName || {},
-                    footerText: updated.footerText || {}
-                },
                 'main_content': updated.mainContent || {},
                 'nav_items': updated.navItems || [],
                 'sidebar_items': updated.sidebarItems || []
