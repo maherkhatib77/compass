@@ -80,21 +80,23 @@ async function initApiData() {
             console.warn('⚠️ שגיאה בטעינת משתמשים:', usersError.message);
         }
         
-        // 3. אתחול ממשק
-        setTimeout(() => {
-            if (typeof renderSolutions === 'function') {
-                console.log('🎨 מרענן תצוגת פתרונות...');
-                renderSolutions();
-            }
-            if (typeof initDashboard === 'function') {
-                console.log('🎨 מאתחל דשבורד...');
-                initDashboard();
-            }
-            if (typeof window.refreshAllViews === 'function') {
-                window.refreshAllViews();
-            }
-            console.log('✅ אתחול ממשק הושלם לאחר טעינת נתוני API');
-        }, 500);
+        // 3. אתחול ממשק - רק אם לא ב-dashboard.html (שם App.init() יטפל בזה)
+        const isDashboard = typeof window !== 'undefined' && window.location && window.location.pathname.includes('dashboard.html');
+        if (!isDashboard) {
+            setTimeout(() => {
+                if (typeof renderSolutions === 'function') {
+                    console.log('🎨 מרענן תצוגת פתרונות...');
+                    renderSolutions();
+                }
+                // initDashboard אינה קיימת ב-app.js - משתמשים ב-renderDashboard דרך showSection
+                if (typeof window.refreshAllViews === 'function') {
+                    window.refreshAllViews();
+                }
+                console.log('✅ אתחול ממשק הושלם לאחר טעינת נתוני API');
+            }, 500);
+        } else {
+            console.log('[api-loader] ⏭️ מדלג על אתחול ממשק - App.init() יטפל בזה');
+        }
         
     } catch (error) {
         console.error('❌ שגיאה קריטית בטעינת ה-API:', error);
@@ -102,19 +104,31 @@ async function initApiData() {
     }
 }
 
-// הפעלה אוטומטית
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
+// חשיפה לפונקציה כדי ש-app.js יוכל להשתמש בה
+if (typeof window !== 'undefined') {
+    window.initApiData = initApiData;
+}
+
+// הפעלה אוטומטית - רק אם לא נטען מתוך dashboard.html
+// הערה: ב-dashboard.html, DataStore.init() מפעיל את App.init() שמטפל בטעינת ה-API
+// לכן אנו מונעים כאן אתחול כפול שעלול לגרום לשגיאות
+if (typeof window !== 'undefined' && window.location && window.location.pathname.includes('dashboard.html')) {
+    // אל תאתחל כאן - dashboard.html יטפל בזה
+    console.log('[api-loader] ⏭️ מדלג על אתחול - dashboard.html יטפל בטעינה');
+} else {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof window.DataStore !== 'undefined' && DataStore.init) {
+                DataStore.init(false).then(initApiData).catch(initApiData);
+            } else {
+                initApiData();
+            }
+        });
+    } else {
         if (typeof window.DataStore !== 'undefined' && DataStore.init) {
             DataStore.init(false).then(initApiData).catch(initApiData);
         } else {
             initApiData();
         }
-    });
-} else {
-    if (typeof window.DataStore !== 'undefined' && DataStore.init) {
-        DataStore.init(false).then(initApiData).catch(initApiData);
-    } else {
-        initApiData();
     }
 }

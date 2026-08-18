@@ -135,6 +135,7 @@
             console.log('[Dashboard] 🔄 מאתחל DataStore...');
             DataStore.init(false).then(() => {
                 console.log('[Dashboard] ✅ DataStore מוכן.');
+                // api-loader.js כבר נטען ומאתחל את ה-API באופן עצמאי
                 _startApp();
             }).catch(err => {
                 console.error('[Dashboard] ❌ שגיאה ב-DataStore:', err);
