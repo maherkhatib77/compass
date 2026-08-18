@@ -46,6 +46,7 @@ button{font-family:inherit}
     linear-gradient(155deg, var(--navy-deep) 0%, var(--primary-dark) 48%, var(--navy) 100%);
   color:#eaf6f6; isolation:isolate;
 }
+/* רשת עדינה */
 .auth-brand::before{
   content:""; position:absolute; inset:0; z-index:-1; opacity:.5;
   background-image:
@@ -55,6 +56,7 @@ button{font-family:inherit}
   -webkit-mask-image:radial-gradient(120% 120% at 30% 20%, #000 30%, transparent 80%);
           mask-image:radial-gradient(120% 120% at 30% 20%, #000 30%, transparent 80%);
 }
+/* אורות צפים */
 .orb{position:absolute; border-radius:50%; filter:blur(46px); z-index:-1; opacity:.55; will-change:transform}
 .orb.a{width:340px;height:340px; top:-90px; left:-70px; background:radial-gradient(circle,#19d3d3,transparent 70%); animation:drift1 16s ease-in-out infinite}
 .orb.b{width:300px;height:300px; bottom:-110px; right:-60px; background:radial-gradient(circle,#0a6f72,transparent 70%); animation:drift2 19s ease-in-out infinite}
@@ -146,6 +148,7 @@ button{font-family:inherit}
 }
 .eye-btn:hover{background:var(--gray-100); color:var(--gray-600)}
 
+/* הדגשה בעת מילוי אוטומטי */
 .input-wrap.flash input{animation:fieldFlash .8s ease}
 @keyframes fieldFlash{0%{box-shadow:0 0 0 0 rgba(12,167,170,.5)}40%{box-shadow:0 0 0 6px rgba(12,167,170,.18);border-color:var(--primary)}100%{box-shadow:0 0 0 0 rgba(12,167,170,0)}}
 
@@ -179,6 +182,7 @@ button{font-family:inherit}
 
 .card-foot{margin-top:26px; text-align:center; font-size:.78rem; color:var(--gray-400); line-height:1.6}
 
+/* ---------- DEV PANEL (מקומי בלבד) ---------- */
 .dev-panel{
   margin-top:22px; padding:14px 16px; border-radius:var(--radius-sm);
   border:1.5px dashed var(--gray-300); background:repeating-linear-gradient(45deg,#fbfdfd,#fbfdfd 10px,#f4f8f8 10px,#f4f8f8 20px);
@@ -203,6 +207,7 @@ button{font-family:inherit}
 .dev-missing{font-size:.8rem; color:var(--gray-500); line-height:1.6}
 .dev-missing code{direction:ltr; background:var(--gray-100); padding:1px 6px; border-radius:5px; font-size:.76rem}
 
+/* ---------- TOAST ---------- */
 .toast{
   position:fixed; top:20px; left:50%; transform:translateX(-50%) translateY(-20px);
   background:var(--gray-800); color:#fff; padding:11px 20px; border-radius:999px;
@@ -214,6 +219,7 @@ button{font-family:inherit}
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 
+/* ---------- RESPONSIVE ---------- */
 @media (max-width:880px){
   .auth-shell{flex-direction:column}
   .auth-brand{flex:none; padding:26px 24px; min-height:auto}
@@ -296,7 +302,7 @@ button{font-family:inherit}
         </button>
       </form>
 
-      <!-- פאנל בדיקה — מופיע רק בסביבה מקומית -->
+      <!-- פאנל בדיקה — מופיע רק בסביבה מקומית, נבנה ע"י ה-JS -->
       <div id="devMount"></div>
 
       <div class="card-foot" id="cardFoot">מערכת פנימית לשימוש מורשים בלבד</div>
@@ -306,120 +312,42 @@ button{font-family:inherit}
 
 <div class="toast" id="toast"></div>
 
-<!-- ספריות המערכת - סדר קריטי! -->
+<!-- ספריות המערכת -->
+<!-- 1. DataStore חייב להיטען ראשון - הוא מגדיר את אובייקט DataStore -->
 <script src="js/data.js"></script>
+
+<!-- 2. API Loader - מאתחל את DataStore מול השרת -->
 <script src="js/api-loader.js"></script>
+
+<!-- 3. Auth - משתמש ב-DataStore -->
 <script src="js/auth.js"></script>
+
 <script src="js/config.js"></script>
 <script src="js/dev-creds.js"></script>
 
 <script>
-// פונקציה גלובלית להמתנה ל-DataStore
-function waitForDataStore(timeout = 10000) {
-    return new Promise((resolve, reject) => {
-        const startTime = Date.now();
-        
-        function check() {
-            if (typeof DataStore !== 'undefined' && 
-                typeof DataStore.getAll === 'function' &&
-                DataStore.isInitialized === true) {
-                resolve();
-                return;
-            }
-            
-            if (Date.now() - startTime > timeout) {
-                // נסיון אחרון - אתחול ידני אם צריך
-                if (typeof DataStore !== 'undefined' && 
-                    typeof DataStore.init === 'function' && 
-                    !DataStore.isInitialized) {
-                    DataStore.init(false).then(resolve).catch(() => resolve());
-                } else {
-                    resolve(); // ממשיכים בכל מקרה
-                }
-                return;
-            }
-            
-            setTimeout(check, 100);
-        }
-        
-        check();
-    });
-}
-
-// פונקציה גלובלית להצגת Toast
-function showToast(msg, type = 'info') {
-    const toast = document.getElementById('toast');
-    if (!toast) return;
-    toast.textContent = msg;
-    toast.className = 'toast show';
-    setTimeout(() => { toast.className = 'toast'; }, 3000);
-}
-
-// אתחול הדף
+// המתנה לטעינת הדף
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('[Login] DOMContentLoaded - מתחיל אתחול...');
-    
-    // שנה נוכחית ב-footer
-    const yearEl = document.getElementById('footYear');
-    if (yearEl) yearEl.textContent = new Date().getFullYear();
-    
-    // שעון חי
-    const clockEl = document.getElementById('liveClock');
-    if (clockEl) {
-        setInterval(() => {
-            const now = new Date();
-            clockEl.textContent = now.getHours().toString().padStart(2,'0') + ':' + 
-                                  now.getMinutes().toString().padStart(2,'0');
-        }, 1000);
+    // אתחול DataStore לפני כל פעולה אחרת
+    console.log('[Login] Initializing DataStore...');
+    if (typeof DataStore !== 'undefined' && typeof DataStore.init === 'function') {
+        try {
+            await DataStore.init();
+            console.log('[Login] DataStore initialized successfully');
+        } catch (error) {
+            console.error('[Login] Failed to initialize DataStore:', error);
+        }
     }
-
-    // ✅ המתן ל-DataStore לפני כל פעולה
-    console.log('[Login] ממתין ל-DataStore...');
-    await waitForDataStore();
-    console.log('[Login] DataStore מוכן!');
     
-    // מילוי אוטומטי של פרטי פיתוח
+    // טעינת פרטי התחברות לפיתוח מקומי (אם קיימים)
     if (window.__DEV_CREDS__ && window.__DEV_CREDS__.length > 0) {
         const devUser = window.__DEV_CREDS__[0];
         document.getElementById('username').value = devUser.user || '';
         document.getElementById('password').value = devUser.pass || '';
-        
-        // בניית פאנל dev
-        const devMount = document.getElementById('devMount');
-        if (devMount) {
-            devMount.innerHTML = `
-                <div class="dev-panel">
-                    <div class="dev-title">🔑 פרטי כניסה לבדיקה</div>
-                    <div class="dev-note">סביבת פיתוח מקומית - לחץ למילוי אוטומטי</div>
-                    <div class="dev-rows">
-                        ${window.__DEV_CREDS__.map(u => `
-                            <div class="dev-row">
-                                <span class="who"><b>${u.role}</b> <code>${u.user}</code></span>
-                                <button type="button" class="dev-fill" onclick="document.getElementById('username').value='${u.user}';document.getElementById('password').value='${u.pass}';document.getElementById('password').focus();">מלא</button>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
+        console.log('[Login] Dev credentials auto-filled for local testing');
     }
     
-    // הצגה/הסתרה של סיסמה
-    const eyeBtn = document.getElementById('eyeBtn');
-    const passInput = document.getElementById('password');
-    if (eyeBtn && passInput) {
-        eyeBtn.addEventListener('click', function() {
-            if (passInput.type === 'password') {
-                passInput.type = 'text';
-                this.textContent = '🙈';
-            } else {
-                passInput.type = 'password';
-                this.textContent = '👁️';
-            }
-        });
-    }
-
-    // אלמנטים
+    // אלמנטים בטופס
     const loginForm = document.getElementById('loginForm');
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
@@ -428,25 +356,22 @@ document.addEventListener('DOMContentLoaded', async function() {
     const submitBtn = document.getElementById('submitBtn');
     const submitLabel = document.getElementById('submitLabel');
 
+    // פונקציה להצגת שגיאה
     function showError(msg) {
         errorText.textContent = msg;
         errorBox.classList.add('show');
         submitBtn.disabled = false;
         submitLabel.innerHTML = 'כניסה למערכת';
-        
-        // אנימציית shake
-        const card = document.querySelector('.auth-card');
-        card.style.animation = 'none';
-        setTimeout(() => card.style.animation = 'shake .42s', 10);
     }
 
-    // ✅ טיפול בשליחת הטופס - e.preventDefault() בתוך ה-listener
+    // טיפול בשליחת הטופס
     loginForm.addEventListener('submit', async function(e) {
-        e.preventDefault(); // מונע שליחת GET ורענון דף
+        e.preventDefault(); // מניעת רענון הדף
 
         const username = usernameInput.value.trim();
         const password = passwordInput.value;
 
+        // איפוס שגיאות
         errorBox.classList.remove('show');
         
         if (!username || !password) {
@@ -454,43 +379,35 @@ document.addEventListener('DOMContentLoaded', async function() {
             return;
         }
 
+        // מצב טעינה
         submitBtn.disabled = true;
         submitLabel.innerHTML = '<span class="spinner"></span> מתחבר...';
 
-        // וידוא ש-Auth קיים
-        if (typeof Auth === 'undefined' || typeof Auth.login !== 'function') {
-            showError('שגיאת מערכת: מודול האימות (auth.js) לא נטען.');
-            console.error('Auth object missing or invalid');
+        // קריאה לפונקציה מהקובץ auth.js
+        if (typeof Auth === 'undefined') {
+            showError('שגיאת מערכת: מודול האימות לא נטען.');
+            console.error('האובייקט Auth לא קיים. בדוק את js/auth.js');
             return;
         }
 
         try {
-            // המתנה נוספת לוודא ש-DataStore זמין
-            await waitForDataStore(5000);
-            
             const result = await Auth.login(username, password);
 
             if (result && result.success) {
-                showToast('התחברת בהצלחה! מעביר ללוח הבקרה...', 'success');
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 800);
+                // הצלחה - מעבר לדאשבורד
+                window.location.href = 'dashboard.html';
             } else {
+                // כישלון - הצגת הודעה
                 showError(result.message || 'שם משתמש או סיסמה שגויים');
             }
-        } // ✅ קוד מתוקן:
-			catch (error) {
-				console.error('[Login] Error:', error);
-				const msg = (error && error.message) ? error.message : 'שגיאת תקשורת לא ידועה';
-				showToast('שגיאה: ' + msg, 'error');
-			}
+        } catch (err) {
+            console.error(err);
+            showError('שגיאה בלתי צפויה: ' + err.message);
+        }
     });
 
-    // בדיקה אם כבר מחובר
-    if (typeof Auth !== 'undefined' && 
-        typeof Auth.isAuthenticated === 'function' && 
-        Auth.isAuthenticated()) {
-        console.log('[Login] משתמש כבר מחובר - מעביר לדשבורד');
+    // בדיקה אם כבר מחובר (למקרה של רענון)
+    if (typeof Auth !== 'undefined' && Auth.isAuthenticated()) {
         window.location.href = 'dashboard.html';
     }
 });

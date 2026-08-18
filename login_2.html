@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מצפן נט - התחברות | بوصلة نت - تسجيل الدخول</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>">
+    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        /* Additional login-specific styles if not in style.css */
+        .login-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary-dark) 35%, var(--primary) 65%, var(--primary-light) 100%);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        .login-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: var(--border-radius-2xl);
+            box-shadow: var(--shadow-2xl), 0 0 80px rgba(13, 148, 136, 0.15);
+            padding: 56px 48px;
+            width: 100%;
+            max-width: 460px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            animation: loginCardEnter 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes loginCardEnter {
+            from { opacity: 0; transform: translateY(40px) scale(0.94); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .login-logo {
+            width: 104px;
+            height: 104px;
+            background: var(--primary-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 32px;
+            font-size: 52px;
+            box-shadow: var(--shadow-glow-lg), 0 20px 40px -10px rgba(13, 148, 136, 0.6);
+            position: relative;
+            animation: logoPulse 3s ease-in-out infinite;
+        }
+        @keyframes logoPulse {
+            0%, 100% { box-shadow: var(--shadow-glow-lg); transform: scale(1); }
+            50% { box-shadow: 0 25px 50px -8px rgba(13, 148, 136, 0.75); transform: scale(1.05); }
+        }
+        .login-card h1 {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--gray-800);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--gray-800) 0%, var(--secondary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .login-card .subtitle {
+            color: var(--gray-500);
+            margin-bottom: 40px;
+            font-size: 15px;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+        .form-group {
+            margin-bottom: 22px;
+            text-align: right;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 10px;
+            letter-spacing: -0.1px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--border-radius-lg);
+            font-size: 15px;
+            font-family: var(--font-family-hebrew);
+            direction: rtl;
+            transition: var(--transition-spring);
+            background: white;
+            color: var(--gray-700);
+            line-height: 1.5;
+            box-shadow: var(--shadow-xs);
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 5px rgba(13, 148, 136, 0.15), var(--shadow-md);
+            transform: translateY(-1px);
+        }
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 6px 20px rgba(13, 148, 136, 0.4);
+            width: 100%;
+            padding: 15px 28px;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            border-radius: var(--border-radius-lg);
+            cursor: pointer;
+            transition: var(--transition-spring);
+            margin-top: 8px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(13, 148, 136, 0.55);
+        }
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .login-credentials {
+            margin-top: 28px;
+            padding-top: 28px;
+            border-top: 1px solid var(--gray-200);
+            text-align: right;
+        }
+        .login-credentials h4 {
+            font-size: 13px;
+            color: var(--gray-500);
+            margin-bottom: 14px;
+            font-weight: 600;
+        }
+        .credential-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            background: var(--gray-50);
+            border-radius: var(--border-radius);
+            margin-bottom: 8px;
+            font-size: 13px;
+            border: 1px solid var(--gray-100);
+            transition: var(--transition);
+        }
+        .credential-item:hover {
+            background: var(--primary-bg);
+            border-color: var(--primary-bg);
+        }
+        .credential-item .cred-label {
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+        .credential-item .cred-value {
+            color: var(--gray-500);
+            direction: ltr;
+            font-weight: 500;
+            font-family: 'Courier New', monospace;
+            font-size: 12.5px;
+            background: white;
+            padding: 3px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--gray-200);
+        }
+        .lang-switch {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+        .lang-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        .lang-btn:hover, .lang-btn.active {
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--primary-dark);
+        }
+        .toast-container {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast {
+            padding: 14px 22px;
+            border-radius: var(--border-radius);
+            background: white;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            min-width: 300px;
+            max-width: 420px;
+            animation: toastSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-right: 5px solid;
+            color: var(--gray-700);
+        }
+        .toast.success { border-color: var(--success); background: linear-gradient(to left, var(--success-bg), white); }
+        .toast.error { border-color: var(--danger); background: linear-gradient(to left, var(--danger-bg), white); }
+        .toast.warning { border-color: var(--warning); background: linear-gradient(to left, var(--warning-bg), white); }
+        .toast.info { border-color: var(--primary); background: linear-gradient(to left, var(--primary-bg), white); }
+        @keyframes toastSlideIn {
+            from { transform: translateX(-100%) scale(0.9); opacity: 0; }
+            to { transform: translateX(0) scale(1); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0) scale(1); opacity: 1; }
+            to { transform: translateX(-120%) scale(0.9); opacity: 0; }
+        }
+        .password-wrapper {
+            position: relative;
+        }
+        .password-toggle {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            color: var(--gray-400);
+            padding: 4px;
+        }
+        .password-toggle:hover {
+            color: var(--primary);
+        }
+        /* Public links */
+        .public-links {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .public-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: var(--primary-bg);
+            transition: var(--transition);
+        }
+        .public-links a:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-1px);
+        }
+        /* Arabic font */
+        [lang="ar"], .arabic-text {
+            font-family: var(--font-family-arabic);
+        }
+        [lang="ar"] h1, [lang="ar"] h2, [lang="ar"] h3, [lang="ar"] h4 {
+            font-family: 'Cairo', var(--font-family-headings);
+        }
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 24, 32, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            backdrop-filter: blur(4px);
+        }
+        .loading-overlay.hidden {
+            display: none;
+        }
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        /* Decorative blobs */
+        .login-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -40%;
+            right: -10%;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, rgba(13, 148, 136, 0.15) 50%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: floatCircle 15s ease-in-out infinite;
+            filter: blur(20px);
+        }
+        .login-wrapper::after {
+            content: '';
+            position: absolute;
+            bottom: -25%;
+            left: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(124, 58, 237, 0.18) 0%, rgba(13, 148, 136, 0.25) 50%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: floatCircle 18s ease-in-out infinite reverse;
+            filter: blur(25px);
+        }
+        @keyframes floatCircle {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(20px, -20px) scale(1.05); }
+            66% { transform: translate(-15px, 15px) scale(0.95); }
+        }
+        /* Responsive */
+        @media (max-width: 480px) {
+            .login-card { padding: 36px 28px; }
+            .login-logo { width: 80px; height: 80px; font-size: 40px; }
+            .login-card h1 { font-size: 24px; }
+            .login-card .subtitle { font-size: 14px; margin-bottom: 28px; }
+            .lang-switch { top: 12px; left: 12px; }
+            .lang-btn { padding: 6px 12px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="lang-switch">
+        <button class="lang-btn active" data-lang="he" onclick="switchLanguage('he')">עברית</button>
+        <button class="lang-btn" data-lang="ar" onclick="switchLanguage('ar')">العربية</button>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Login Wrapper -->
+    <div class="login-wrapper">
+        <div class="login-card">
+            <!-- Logo -->
+            <div class="login-logo" id="globalHeaderLogo">🧭</div>
+
+            <!-- Titles -->
+            <h1 id="loginTitle">מצפן נט</h1>
+            <p class="subtitle" id="loginSubtitle">מערכת ניהול פתרונות למידה — משרד החינוך</p>
+
+            <!-- Login Form -->
+            <form id="loginForm" autocomplete="on">
+                <div class="form-group">
+                    <label for="username" id="usernameLabel">שם משתמש</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        class="form-input" 
+                        placeholder="הכנס שם משתמש"
+                        required
+                        autocomplete="username"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password" id="passwordLabel">סיסמה</label>
+                    <div class="password-wrapper">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            class="form-input" 
+                            placeholder="הכנס סיסמה"
+                            required
+                            autocomplete="current-password"
+                            style="padding-left: 44px;"
+                        >
+                        <button type="button" class="password-toggle" onclick="togglePassword()" title="הצג/הסתר סיסמה">
+                            <span id="passwordIcon">👁️</span>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary" id="loginBtn">
+                    <span id="loginBtnText">🔐 התחבר למערכת</span>
+                </button>
+            </form>
+
+            <!-- Dev Credentials (shown only in localhost) -->
+            <div class="login-credentials" id="devCredentials" style="display: none;">
+                <h4 id="devCredsTitle">🔑 פרטי כניסה לבדיקה (סביבת פיתוח בלבד):</h4>
+                <div id="devCredsList"></div>
+            </div>
+
+            <!-- Public Links -->
+            <div class="public-links">
+                <a href="./catalog.html" id="catalogLink">📚 קטלוג השתלמויות</a>
+                <a href="./team.html" id="teamLink">👥 צוות המדריכים</a>
+                <a href="./faq.html" id="faqLink">❓ שאלות נפוצות</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+	<!-- 1. DataStore חייב להיטען ראשון -->
+	<script src="js/data.js"></script>
+	<!-- 2. פרטי בדיקה מקומיים (אופציונלי) -->
+	<script src="js/dev-creds.js"></script>
+	<!-- 3. ממשק גלובלי -->
+	<script src="js/global-ui.js"></script>
+	
+	<script src="./js/dev-creds.js"></script> 
+    
+    <script>
+    /**
+     * Login Page Logic
+     * Handles authentication, language switching, and UI updates
+     */
+    (function() {
+        'use strict';
+
+        let currentLang = 'he';
+        let isLoading = false;
+
+        // ======================== Translations ========================
+        const translations = {
+            he: {
+                title: 'מצפן נט',
+                subtitle: 'מערכת ניהול פתרונות למידה — משרד החינוך',
+                usernameLabel: 'שם משתמש',
+                usernamePlaceholder: 'הכנס שם משתמש',
+                passwordLabel: 'סיסמה',
+                passwordPlaceholder: 'הכנס סיסמה',
+                loginBtn: '🔐 התחבר למערכת',
+                loggingIn: '⏳ מתחבר...',
+                devCredsTitle: '🔑 פרטי כניסה לבדיקה (סביבת פיתוח בלבד):',
+                catalogLink: '📚 קטלוג השתלמויות',
+                teamLink: '👥 צוות המדריכים',
+                faqLink: '❓ שאלות נפוצות',
+                errorEmpty: 'נא למלא את כל השדות',
+                errorInvalid: 'שם משתמש או סיסמה שגויים',
+                errorServer: 'שגיאת שרת. נסה שוב.',
+                success: 'התחברת בהצלחה! מעביר ללוח הבקרה...',
+                welcomeBack: 'ברוך הבא, ',
+                roleLabels: {
+                    admin: 'מנהל מערכת',
+                    system_admin: 'מנהל מערכת',
+                    guide: 'מדריך פסג״ה',
+                    system_operator: 'מפעיל מערכת',
+                    team_leader: 'רכז צוות'
+                }
+            },
+            ar: {
+                title: 'بوصلة نت',
+                subtitle: 'نظام إدارة حلول التعلم — وزارة التربية والتعليم',
+                usernameLabel: 'اسم المستخدم',
+                usernamePlaceholder: 'أدخل اسم المستخدم',
+                passwordLabel: 'كلمة المرور',
+                passwordPlaceholder: 'أدخل كلمة المرور',
+                loginBtn: '🔐 تسجيل الدخول',
+                loggingIn: '⏳ جاري التسجيل...',
+                devCredsTitle: '🔑 بيانات دخول للاختبار (بيئة التطوير فقط):',
+                catalogLink: '📚 كتالوج الدورات',
+                teamLink: '👥 فريق المرشدين',
+                faqLink: '❓ الأسئلة الشائعة',
+                errorEmpty: 'يرجى ملء جميع الحقول',
+                errorInvalid: 'اسم المستخدم أو كلمة المرور غير صحيحة',
+                errorServer: 'خطأ في الخادم. حاول مرة أخرى.',
+                success: 'تم تسجيل الدخول بنجاح! جاري التحويل...',
+                welcomeBack: 'مرحباً، ',
+                roleLabels: {
+                    admin: 'مدير النظام',
+                    system_admin: 'مدير النظام',
+                    guide: 'مرشد بسجا',
+                    system_operator: 'مشغل النظام',
+                    team_leader: 'منسق فريق'
+                }
+            }
+        };
+
+        // ======================== Language Switching ========================
+        function switchLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            document.documentElement.dir = 'rtl';
+            
+            // Update button states
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+
+            // Update all text
+            const t = translations[lang];
+            document.getElementById('loginTitle').textContent = t.title;
+            document.getElementById('loginSubtitle').textContent = t.subtitle;
+            document.getElementById('usernameLabel').textContent = t.usernameLabel;
+            document.getElementById('username').placeholder = t.usernamePlaceholder;
+            document.getElementById('passwordLabel').textContent = t.passwordLabel;
+            document.getElementById('password').placeholder = t.passwordPlaceholder;
+            
+            if (!isLoading) {
+                document.getElementById('loginBtnText').textContent = t.loginBtn;
+            }
+            
+            document.getElementById('devCredsTitle').textContent = t.devCredsTitle;
+            document.getElementById('catalogLink').textContent = t.catalogLink;
+            document.getElementById('teamLink').textContent = t.teamLink;
+            document.getElementById('faqLink').textContent = t.faqLink;
+
+            // Update dev credentials display
+            renderDevCredentials();
+        }
+
+        // ======================== Password Toggle ========================
+        window.togglePassword = function() {
+            const passwordInput = document.getElementById('password');
+            const icon = document.getElementById('passwordIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.textContent = '🙈';
+            } else {
+                passwordInput.type = 'password';
+                icon.textContent = '👁️';
+            }
+        };
+
+        // ======================== Toast Notifications ========================
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+            toast.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ======================== Loading State ========================
+        function setLoading(loading) {
+            isLoading = loading;
+            const overlay = document.getElementById('loadingOverlay');
+            const btn = document.getElementById('loginBtn');
+            const btnText = document.getElementById('loginBtnText');
+            const t = translations[currentLang];
+            
+            if (loading) {
+                overlay.classList.remove('hidden');
+                btn.disabled = true;
+                btnText.textContent = t.loggingIn;
+            } else {
+                overlay.classList.add('hidden');
+                btn.disabled = false;
+                btnText.textContent = t.loginBtn;
+            }
+        }
+
+        // ======================== Dev Credentials ========================
+        function renderDevCredentials() {
+            const credsContainer = document.getElementById('devCredentials');
+            const credsList = document.getElementById('devCredsList');
+            const t = translations[currentLang];
+            
+            // Only show in local environment
+            if (typeof window.__DEV_CREDS__ !== 'undefined' && window.__DEV_CREDS__.length > 0) {
+                credsContainer.style.display = 'block';
+                
+                credsList.innerHTML = window.__DEV_CREDS__.map(cred => {
+                    const roleLabel = t.roleLabels[cred.role] || cred.role;
+                    return `
+                        <div class="credential-item" onclick="fillCredentials('${cred.user}', '${cred.pass}')">
+                            <span class="cred-label">${roleLabel}</span>
+                            <span class="cred-value">${cred.user} / ${cred.pass}</span>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                credsContainer.style.display = 'none';
+            }
+        }
+
+        window.fillCredentials = function(user, pass) {
+            document.getElementById('username').value = user;
+            document.getElementById('password').value = pass;
+            document.getElementById('password').focus();
+        };
+
+        // ======================== Authentication ========================
+        async function handleLogin(e) {
+            e.preventDefault();
+            const t = translations[currentLang];
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            // Validate
+            if (!username || !password) {
+                showToast(t.errorEmpty, 'warning');
+                return;
+            }
+
+            setLoading(true);
+
+            try {
+                // Wait for DataStore to be initialized
+                if (typeof DataStore !== 'undefined' && !DataStore.isInitialized) {
+                    await DataStore.init(false);
+                }
+
+                // Get users from DataStore
+                const users = (typeof DataStore !== 'undefined' && DataStore.getAll) 
+                    ? DataStore.getAll(DataStore.KEYS.USERS) 
+                    : [];
+
+                // Find user
+                const user = users.find(u => 
+                    u.username === username && 
+                    (u.password === password || u.passwordHash === password) &&
+                    u.isActive !== false
+                );
+
+                if (!user) {
+                    setLoading(false);
+                    showToast(t.errorInvalid, 'error');
+                    
+                    // Shake animation
+                    const card = document.querySelector('.login-card');
+                    card.style.animation = 'none';
+                    setTimeout(() => {
+                        card.style.animation = 'shake 0.5s ease';
+                    }, 10);
+                    return;
+                }
+
+                // Success - save session
+                if (typeof DataStore !== 'undefined' && DataStore.setSession) {
+                    DataStore.setSession(user);
+                } else {
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    localStorage.setItem('isLoggedIn', 'true');
+                }
+
+                const roleLabel = t.roleLabels[user.role] || user.role;
+                showToast(t.success, 'success');
+
+                // Redirect after short delay
+                setTimeout(() => {
+                    window.location.href = './index.html';
+                }, 1000);
+
+            } catch (err) {
+                console.error('[Login] Error:', err);
+                setLoading(false);
+                showToast(t.errorServer, 'error');
+            }
+        }
+
+        // ======================== Check Existing Session ========================
+        function checkExistingSession() {
+            try {
+                const currentUser = localStorage.getItem('currentUser');
+                const isLoggedIn = localStorage.getItem('isLoggedIn');
+                
+                if (currentUser && isLoggedIn === 'true') {
+                    const user = JSON.parse(currentUser);
+                    if (user && user.username) {
+                        // User already logged in, redirect to dashboard
+                        window.location.href = './index.html';
+                        return true;
+                    }
+                }
+            } catch (e) {
+                console.warn('[Login] Session check failed:', e);
+            }
+            return false;
+        }
+
+        // ======================== Initialization ========================
+        async function init() {
+            // Check if already logged in
+            if (checkExistingSession()) return;
+
+            // Initialize DataStore
+            try {
+                if (typeof DataStore !== 'undefined' && DataStore.init) {
+                    await DataStore.init(false);
+                }
+            } catch (e) {
+                console.warn('[Login] DataStore init failed:', e);
+            }
+
+            // Apply GlobalUI if available
+            if (typeof GlobalUI !== 'undefined' && GlobalUI.apply) {
+                GlobalUI.apply(currentLang);
+            }
+
+            // Render dev credentials
+            renderDevCredentials();
+
+            // Bind form submit
+            const form = document.getElementById('loginForm');
+            if (form) {
+                form.addEventListener('submit', handleLogin);
+            }
+
+            // Auto-focus username
+            setTimeout(() => {
+                document.getElementById('username').focus();
+            }, 500);
+
+            // Add shake animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+                    20%, 40%, 60%, 80% { transform: translateX(8px); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // ======================== Boot ========================
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+
+        // Expose for debugging
+        window.LoginPage = {
+            switchLanguage,
+            showToast,
+            currentLang: () => currentLang
+        };
+    })();
+    </script>
+</body>
+</html>

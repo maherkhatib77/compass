@@ -1,398 +1,377 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بوصلة نت — מצפן נט</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Noto+Sans+Arabic:wght@300;400;500;600;700;800;900&family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>">
+<link rel="stylesheet" href="./css/style.css">
+<style>
+/* ============ HOMEPAGE LAYOUT ============ */
+.hp-header {
+    background: linear-gradient(135deg, var(--primary, #0d9488) 0%, var(--primary-dark, #0f766e) 100%);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 16px rgba(0,0,0,.06);
+}
+.hp-header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+.hp-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #fff;
+    text-decoration: none;
+}
+.hp-logo-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    border: 3px solid rgba(255,255,255,.4);
+    background: rgba(255,255,255,.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+.hp-logo-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.hp-logo-text {
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+}
+.hp-logo-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,.7);
+    font-weight: 400;
+}
 
-    <!-- חובה: קודם config -->
-    <script src="js/config.js"></script>
-    <!-- אחר כך: api-loader -->
-    <script src="js/api-loader.js?v=1.0.0"></script>
+/* Navigation Bar */
+.hp-nav {
+    background: rgba(255,255,255,.95);
+    border-bottom: 1px solid var(--gray-200, #e5e5e5);
+    padding: 0 24px;
+}
+.hp-nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    overflow-x: auto;
+}
+.hp-nav-item {
+    padding: 12px 18px;
+    color: var(--gray-600, #555);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    transition: all .2s;
+}
+.hp-nav-item:hover, .hp-nav-item.active {
+    color: var(--primary, #0d9488);
+    border-bottom-color: var(--primary, #0d9488);
+    background: var(--primary-bg, #f0fdfa);
+}
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوصلة نت</title>
-    <link rel="stylesheet" href="./css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Noto+Sans+Arabic:wght@300;400;500;600;700;800;900&family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Noto Sans Arabic', sans-serif;
-            min-height: 100vh;
-            background: linear-gradient(180deg, #fafafa 0%, #f4f4f5 100%);
-            display: flex;
-            flex-direction: column;
-            direction: rtl;
-        }
-        body[dir="rtl"] { direction: rtl; }
-        body[dir="ltr"] { direction: ltr; }
+/* Main Layout: Sidebar (1) + Content (2) = 1:2 ratio */
+.hp-main {
+    flex: 1;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 32px 24px;
+    display: grid;
+    grid-template-columns: 1fr 2fr;  /* יחס 1:2 — Sidebar קטן, Content גדול */
+    gap: 32px;
+}
 
-        /* Apply Cairo font for headings in Arabic */
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Cairo', 'Noto Sans Arabic', sans-serif;
-        }
+/* Sidebar (ימני, קטן) */
+.hp-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.hp-sidebar-card {
+    background: #fff;
+    border-radius: var(--border-radius, 12px);
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+.hp-sidebar-card h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gray-700, #24343f);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--primary, #0d9488);
+}
+.hp-sidebar-item {
+    display: block;
+    padding: 10px 12px;
+    color: var(--gray-600, #555);
+    text-decoration: none;
+    font-size: 14px;
+    border-radius: 8px;
+    transition: all .2s;
+    margin-bottom: 4px;
+}
+.hp-sidebar-item:hover {
+    background: var(--primary-bg, #f0fdfa);
+    color: var(--primary, #0d9488);
+}
 
-        /* ── Header - Enhanced Modern Design ── */
-        .hp-header {
-            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary-dark) 100%);
-            padding: 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 8px 32px rgba(0,0,0,.12), 0 0 0 1px rgba(255,255,255,0.1);
-        }
-        .hp-header-inner {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-        }
-        .hp-logo-area {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            text-decoration: none;
-        }
-        .hp-logo-img {
-            width: 56px;
-            height: 56px;
-            border-radius: 14px;
-            object-fit: cover;
-            border: 3px solid rgba(255,255,255,.5);
-            background: rgba(255,255,255,.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            overflow: hidden;
-            flex-shrink: 0;
-            box-shadow: 0 4px 16px rgba(0,0,0,.2), 0 0 20px rgba(13, 148, 136, 0.3);
-            transition: var(--transition-spring);
-        }
-        .hp-logo-img:hover {
-            transform: scale(1.05) rotate(2deg);
-            box-shadow: 0 6px 20px rgba(0,0,0,.25), 0 0 30px rgba(13, 148, 136, 0.4);
-        }
-        .hp-logo-img img { width: 100%; height: 100%; object-fit: cover; }
-        .hp-site-name {
-            font-size: 22px;
-            font-weight: 800;
-            color: #fff;
-            text-shadow: 0 2px 8px rgba(0,0,0,.2);
-            line-height: 1.3;
-            letter-spacing: -0.3px;
-        }
-        
-        /* ── Navigation - Enhanced ── */
-        .hp-nav {
-            background: linear-gradient(180deg, #ffffff 0%, #f8fafb 100%);
-            border-bottom: 1px solid #e4e4e7;
-            box-shadow: 0 2px 8px rgba(0,0,0,.04);
-        }
-        .hp-nav-inner {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 24px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        .hp-nav-inner::-webkit-scrollbar { height: 0; }
-        .hp-nav-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 16px 22px;
-            font-size: 15.5px;
-            font-weight: 600;
-            font-family: 'Noto Sans Arabic', sans-serif;
-            color: #4c6373;
-            text-decoration: none;
-            white-space: nowrap;
-            border-bottom: 3px solid transparent;
-            transition: var(--transition-spring);
-            border-radius: 8px 8px 0 0;
-            position: relative;
-            overflow: hidden;
-        }
-        .hp-nav-link::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg, rgba(13, 148, 136, 0.08) 0%, transparent 100%);
-            opacity: 0;
-            transition: var(--transition);
-        }
-        .hp-nav-link:hover::before {
-            opacity: 1;
-        }
-        .hp-nav-link:hover {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-            background: rgba(13, 148, 136, 0.06);
-            transform: translateY(-2px);
-        }
+/* Content (שמאלי, גדול) */
+.hp-content {
+    background: #fff;
+    border-radius: var(--border-radius, 12px);
+    padding: 32px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    min-height: 400px;
+}
+.hp-content img { max-width: 100%; height: auto; border-radius: 8px; margin: 12px 0; }
+.hp-content table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+.hp-content td, .hp-content th { border: 1px solid var(--gray-200, #e5e5e5); padding: 10px 14px; text-align: right; }
+.hp-content th { background: var(--gray-50, #f7f7f7); font-weight: 700; }
+.hp-content a { color: var(--primary, #0d9488); text-decoration: underline; }
+.hp-content h1, .hp-content h2, .hp-content h3 { margin: 24px 0 12px; color: var(--gray-700, #24343f); line-height: 1.4; }
+.hp-content h1 { font-size: 26px; }
+.hp-content h2 { font-size: 22px; }
+.hp-content h3 { font-size: 18px; }
+.hp-content p { margin-bottom: 12px; line-height: 1.9; }
+.hp-content ul, .hp-content ol { margin: 12px 0; padding-right: 24px; }
+.hp-content li { margin-bottom: 6px; line-height: 1.8; }
 
-        /* ── Content Area ── */
-        .hp-content-area {
-            flex: 1;
-            max-width: 1200px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 40px 24px;
-            display: grid;
-            grid-template-columns: 1fr 4fr;
-            gap: 32px;
-        }
+/* Footer */
+.hp-footer {
+    text-align: center;
+    padding: 18px;
+    color: var(--gray-300, #999);
+    font-size: 12px;
+    border-top: 1px solid var(--gray-100, #f2f2f2);
+    background: rgba(255,255,255,.7);
+    flex-shrink: 0;
+}
 
-        /* Sidebar - Enhanced */
-        .hp-sidebar {
-            background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
-            border: 1px solid #e4e4e7;
-            border-radius: var(--border-radius-xl);
-            padding: 28px;
-            font-size: 14.5px;
-            line-height: 1.9;
-            color: #52525b;
-            word-break: break-word;
-            align-self: start;
-            position: sticky;
-            top: 100px;
-            box-shadow: var(--shadow-md);
-            transition: var(--transition);
-        }
-        .hp-sidebar:hover {
-            box-shadow: var(--shadow-lg);
-        }
-        .hp-sidebar a { 
-            color: var(--primary); 
-            text-decoration: none; 
-            font-weight: 600;
-            transition: var(--transition);
-        }
-        .hp-sidebar a:hover { 
-            text-decoration: underline; 
-            color: var(--primary-dark);
-        }
-
-        /* Main - Enhanced */
-        .hp-main {
-            font-size: 16.5px;
-            line-height: 2;
-            color: #27272a;
-            word-break: break-word;
-            background: white;
-            padding: 32px;
-            border-radius: var(--border-radius-xl);
-            box-shadow: var(--shadow);
-            border: 1px solid #f4f4f5;
-        }
-
-        /* ── Rich Text Styles (for Quill WYSIWYG content) - Enhanced ── */
-        .hp-main h1 { 
-            font-size: 32px; 
-            font-weight: 800; 
-            margin: 0 0 16px 0; 
-            color: var(--gray-800); 
-            line-height: 1.3;
-            background: linear-gradient(135deg, var(--gray-800) 0%, var(--secondary-light) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .hp-main h2 { 
-            font-size: 26px; 
-            font-weight: 700; 
-            margin: 24px 0 12px; 
-            color: var(--secondary); 
-            line-height: 1.4; 
-        }
-        .hp-main h3 { 
-            font-size: 20px; 
-            font-weight: 700; 
-            margin: 20px 0 10px; 
-            color: var(--primary-dark); 
-            line-height: 1.4; 
-        }
-        .hp-main p { margin: 14px 0; }
-        .hp-main ul, .hp-main ol { padding-right: 24px; margin: 14px 0; }
-        .hp-main ul { list-style-type: disc; }
-        .hp-main ol { list-style-type: decimal; }
-        .hp-main li { margin: 6px 0; }
-        .hp-main blockquote { 
-            border-right: 5px solid var(--primary); 
-            padding: 16px 24px; 
-            margin: 20px 0; 
-            background: linear-gradient(135deg, var(--primary-bg) 0%, rgba(13, 148, 136, 0.05) 100%); 
-            border-radius: 0 12px 12px 0; 
-            color: var(--gray-700);
-            font-style: italic;
-            box-shadow: var(--shadow-xs);
-        }
-        .hp-main a { 
-            color: var(--primary); 
-            text-decoration: none;
-            font-weight: 600;
-            transition: var(--transition);
-        }
-        .hp-main a:hover { 
-            text-decoration: underline;
-            color: var(--primary-dark);
-        }
-        .hp-main img { 
-            max-width: 100%; 
-            height: auto; 
-            border-radius: var(--border-radius-lg); 
-            margin: 16px 0;
-            box-shadow: var(--shadow-md);
-        }
-        .hp-main strong { font-weight: 700; }
-        .hp-main em { font-style: italic; }
-
-        /* ── Footer - Enhanced ── */
-        .hp-footer {
-            text-align: center;
-            padding: 28px 24px;
-            border-top: 1px solid #e4e4e7;
-            background: linear-gradient(180deg, #f8fafb 0%, #f4f4f5 100%);
-            font-size: 14px;
-            color: var(--gray-500);
-            flex-shrink: 0;
-            margin-top: auto;
-        }
-        .hp-footer a { 
-            color: var(--primary); 
-            text-decoration: none;
-            font-weight: 600;
-        }
-        .hp-footer a:hover { 
-            text-decoration: underline;
-            color: var(--primary-dark);
-        }
-
-        /* ── Responsive ── */
-        @media (max-width: 768px) {
-            .hp-header-inner { flex-wrap: wrap; padding: 16px 18px; }
-            .hp-site-name { font-size: 19px; }
-            .hp-logo-img { width: 48px; height: 48px; font-size: 26px; }
-            .hp-content-area { grid-template-columns: 1fr; padding: 24px 18px; gap: 24px; }
-            .hp-sidebar { position: static; }
-            .hp-nav-link { padding: 14px 16px; font-size: 14.5px; }
-            .hp-main h1 { font-size: 26px; }
-            .hp-main h2 { font-size: 22px; }
-            .hp-main h3 { font-size: 18px; }
-            .hp-main { padding: 20px; }
-        }
-        @media (max-width: 480px) {
-            .hp-site-name { font-size: 18px; }
-            .hp-logo-area { gap: 12px; }
-        }
-    </style>
+/* Responsive */
+@media (max-width: 768px) {
+    .hp-main {
+        grid-template-columns: 1fr;
+        padding: 16px;
+    }
+    .hp-header-inner { flex-wrap: wrap; }
+    .hp-logo-icon { width: 44px; height: 44px; font-size: 24px; }
+}
+</style>
 </head>
 <body>
-    <!-- 1. Header Section -->
-    <header class="hp-header">
-        <div class="hp-header-inner">
-            <div class="hp-logo-area" id="hpLogoArea">
-                <div class="hp-logo-img" id="globalHeaderLogo">🧭</div>
-                <div class="hp-site-name" id="hpSiteName">بوصلة نت</div>
+<!-- ============ HEADER (אופקי) ============ -->
+<header class="hp-header">
+    <div class="hp-header-inner">
+        <a class="hp-logo" href="./index.html">
+            <span class="hp-logo-icon" id="globalHeaderLogo">🧭</span>
+            <div>
+                <div class="hp-logo-text" id="globalHeaderNameAr">بوصلة نت</div>
+                <div class="hp-logo-sub" id="globalHeaderNameHe">מצפן נט</div>
             </div>
-        </div>
-    </header>
-
-    <!-- 2. Navigation Bar -->
-    <nav class="hp-nav" id="hpNavBar">
-        <div class="hp-nav-inner" id="hpNavInner"></div>
-    </nav>
-
-    <!-- 3 & 4. Content Area (Sidebar 20% + Main 80%) -->
-    <div class="hp-content-area">
-        <aside class="hp-sidebar" id="hpSidebar"></aside>
-        <main class="hp-main" id="hpMain"></main>
+        </a>
     </div>
+</header>
 
-    <!-- 5. Footer Section -->
-    <footer class="hp-footer" id="globalFooterText"></footer>
-<!-- טעינת ספריות -->
-    <!-- TinyMCE (Rich Text Editor) -->
-    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<!-- ============ NAVIGATION (אופקי) ============ -->
+<nav class="hp-nav" id="hpNavBar">
+    <div class="hp-nav-inner" id="hpNavItems">
+        <!-- ייטען דינמית מ-homepage_settings -->
+    </div>
+</nav>
 
-    <script src="./js/auth.js?v=1.0.0"></script>
-    <script src="./js/data.js?v=4.5.0"></script>
-    <script src="./js/api-loader.js?v=1.0.0"></script>
-    <script src="./js/global-ui.js?v=1.0.0"></script>
-    <script>
-        var currentLang = 'ar';
+<!-- ============ MAIN (Sidebar + Content ביחס 1:2) ============ -->
+<main class="hp-main">
+    <!-- Sidebar (ימני, קטן) -->
+    <aside class="hp-sidebar" id="hpSidebar">
+        <!-- ייטען דינמית מ-homepage_settings -->
+    </aside>
 
-        function escapeHtml(str) {
-            if (!str) return '';
-            var d = document.createElement('div');
-            d.textContent = str;
-            return d.innerHTML;
-        }
+    <!-- Content (שמאלי, גדול) -->
+    <div class="hp-content" id="hpMainContent">
+        <!-- ייטען דינמית מ-homepage_settings -->
+        <p style="text-align:center;color:var(--gray-400);">טוען תוכן...</p>
+    </div>
+</main>
 
-        function renderPage() {
-            var hp = (typeof DataStore !== 'undefined' && DataStore.getHomepage) ? DataStore.getHomepage() : {};
-            var lang = currentLang;
+<!-- ============ FOOTER (אופקי) ============ -->
+<footer class="hp-footer" id="globalFooterText">
+    بوصلة نت © 2026 | وزارة التربية والتعليم
+</footer>
 
-            // Logo
-            var logoEl = document.getElementById('globalHeaderLogo');
-            if (hp.logo) {
-                logoEl.innerHTML = '<img src="' + escapeHtml(hp.logo) + '" alt="logo">';
-            } else {
-                logoEl.innerHTML = '🧭';
-            }
+<!-- Scripts -->
+<script src="./js/data.js?v=4.11.0"></script>
+<script src="./js/global-ui.js?v=1.0.0"></script>
+<script>
+/**
+ * דף שער — טעינת נתונים מ-homepage_settings והצגה
+ */
+(function() {
+    'use strict';
 
-            // Site name (safe access)
-            var siteName = (hp && hp.siteName && (hp.siteName[lang] || hp.siteName.he)) || 'מצפן נט';
-            document.getElementById('hpSiteName').textContent = siteName;
-            document.title = siteName;
+    var currentLang = 'ar'; // ברירת מחדל: ערבית
 
-            // Nav items — each opens in a new tab
-            var navItems = (hp.navItems || []).filter(function(n) { return n.isActive !== false; })
-                .slice().sort(function(a,b) { return (a.order||0) - (b.order||0); });
-            var navHtml = navItems.map(function(n) {
-                var label = lang === 'ar' ? (n.labelAr || n.labelHe) : n.labelHe;
-                return '<a class="hp-nav-link" href="' + escapeHtml(n.url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(label) + '</a>';
-            }).join('');
-            document.getElementById('hpNavInner').innerHTML = navHtml;
+    /**
+     * אתחול
+     */
+    function init() {
+        // הגדרת שנה ב-footer
+        var yearEl = document.getElementById('footerYear');
+        if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-            // Show/hide nav bar
-            document.getElementById('hpNavBar').style.display = navItems.length ? '' : 'none';
-
-            // Sidebar items — each opens in a new tab (same as nav)
-            var sidebarItems = (hp.sidebarItems || []).filter(function(n) { return n.isActive !== false; })
-                .slice().sort(function(a,b) { return (a.order||0) - (b.order||0); });
-            var sidebarHtml = '';
-            if (sidebarItems.length) {
-                sidebarHtml = '<ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px;">';
-                sidebarItems.forEach(function(n) {
-                    var label = lang === 'ar' ? (n.labelAr || n.labelHe) : n.labelHe;
-                    sidebarHtml += '<li><a class="hp-nav-link" href="' + escapeHtml(n.url) + '" target="_blank" rel="noopener noreferrer" style="display:block;padding:10px 14px;border-radius:8px;border:1px solid #ececec;">' + escapeHtml(label) + '</a></li>';
-                });
-                sidebarHtml += '</ul>';
-            }
-            document.getElementById('hpSidebar').innerHTML = sidebarHtml;
-
-            // Main content (rich text from Quill WYSIWYG — must use innerHTML)
-            document.getElementById('hpMain').innerHTML = (hp && hp.mainContent && (hp.mainContent[lang] || hp.mainContent.he)) || '';
-
-            // Footer (supports HTML — links, copyright text, etc.)
-            document.getElementById('globalFooterText').innerHTML = (hp && hp.footerText && (hp.footerText[lang] || hp.footerText.he)) || '';
-            if (typeof GlobalUI !== 'undefined') GlobalUI.apply(currentLang);
-        }
-
-        // Initialize
-        if (typeof DataStore !== 'undefined' && DataStore.init && typeof DataStore.init === 'function') {
-            var _t = setTimeout(function() { renderPage(); }, 5000);
-            DataStore.init(false).then(function() { clearTimeout(_t); renderPage(); }).catch(function() { clearTimeout(_t); renderPage(); });
+        if (DataStore.init && typeof DataStore.init === 'function') {
+            var _initTimeout = setTimeout(function() {
+                console.warn('[Homepage] DataStore.init timed out, starting setup anyway.');
+                setup();
+            }, 6000);
+            DataStore.init(false).then(function() {
+                clearTimeout(_initTimeout);
+                setup();
+            }).catch(function(err) {
+                clearTimeout(_initTimeout);
+                console.error('[Homepage] DataStore init failed:', err);
+                setup();
+            });
         } else {
-            renderPage();
+            setup();
         }
-    </script>
+    }
+
+    /**
+     * הגדרה לאחר טעינת DataStore
+     */
+    function setup() {
+        // 1. זיהוי שפה מהגדרות
+        var settings = DataStore.getSettings();
+        currentLang = (settings && settings.language) || 'ar';
+        applyLanguage(currentLang);
+
+        // 2. טעינת נתוני דף שער
+        var hp = DataStore.getHomepage();
+
+        // 3. רינדור סרגל ניווט
+        renderNav(hp.navItems || []);
+
+        // 4. רינדור Sidebar
+        renderSidebar(hp.sidebarItems || []);
+
+        // 5. רינדור תוכן מרכזי
+        renderMainContent(hp.mainContent || { combined: '', he: '', ar: '' });
+
+        // 6. החלת Header/Footer מהגדרות
+        if (typeof GlobalUI !== 'undefined') GlobalUI.apply(currentLang);
+    }
+
+    /**
+     * החלת שפה
+     */
+    function applyLanguage(lang) {
+        currentLang = lang;
+        document.documentElement.lang = lang === 'ar' ? 'ar' : 'he';
+        document.documentElement.dir = 'rtl'; // גם עברית וגם ערבית הן RTL
+    }
+
+    /**
+     * רינדור סרגל ניווט
+     */
+    function renderNav(items) {
+        var navBar = document.getElementById('hpNavBar');
+        var navContainer = document.getElementById('hpNavItems');
+        if (!navBar || !navContainer) return;
+
+        if (!items || items.length === 0) {
+            navBar.style.display = 'none';
+            return;
+        }
+
+        navBar.style.display = 'block';
+        navContainer.innerHTML = items
+            .filter(function(item) { return item.isActive !== false; })
+            .sort(function(a, b) { return (a.order || 0) - (b.order || 0); })
+            .map(function(item) {
+                var label = currentLang === 'ar' 
+                    ? (item.labelAr || item.labelHe || '') 
+                    : (item.labelHe || item.labelAr || '');
+                var isActive = window.location.pathname.includes(item.url) ? ' active' : '';
+                return '<a href="' + (item.url || '#') + '" class="hp-nav-item' + isActive + '">' + label + '</a>';
+            }).join('');
+    }
+
+    /**
+     * רינדור Sidebar
+     */
+    function renderSidebar(items) {
+        var sidebar = document.getElementById('hpSidebar');
+        if (!sidebar) return;
+
+        if (!items || items.length === 0) {
+            sidebar.style.display = 'none';
+            return;
+        }
+
+        sidebar.style.display = 'flex';
+        sidebar.innerHTML = items
+            .filter(function(item) { return item.isActive !== false; })
+            .sort(function(a, b) { return (a.order || 0) - (b.order || 0); })
+            .map(function(item) {
+                var label = currentLang === 'ar' 
+                    ? (item.labelAr || item.labelHe || '') 
+                    : (item.labelHe || item.labelAr || '');
+                return '<a href="' + (item.url || '#') + '" class="hp-sidebar-item">' + label + '</a>';
+            }).join('');
+    }
+
+    /**
+     * רינדור תוכן מרכזי
+     */
+    function renderMainContent(content) {
+        var contentEl = document.getElementById('hpMainContent');
+        if (!contentEl) return;
+
+        var html = '';
+        if (currentLang === 'ar') {
+            html = content.ar || content.combined || content.he || '';
+        } else {
+            html = content.he || content.combined || content.ar || '';
+        }
+
+        if (html && html.trim()) {
+            contentEl.innerHTML = html;
+        } else {
+            contentEl.innerHTML = '<p style="text-align:center;color:var(--gray-400);">אין תוכן להצגה</p>';
+        }
+    }
+
+    // אתחול
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+</script>
 </body>
 </html>

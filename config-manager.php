@@ -32,7 +32,7 @@ $config_local = [
 // ☁️ סביבת פרודקשן (שרת ענן)
 // ============================================================================
 $config_production = [
-    'host' => 'ejpisga.org',  // או כתובת ה-IP/דומיין של השרת המרוחק
+    'host' => 'ejpisga.org',
     'db_name' => 'ejpisgaorg_matspanet_main',
     'username' => 'ejpisgaorg_matspanet_app',
     'password' => 'Adan.3011$',
